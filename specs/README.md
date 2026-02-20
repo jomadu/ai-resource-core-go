@@ -20,7 +20,7 @@
 - **Type Accessors** - Safe conversion from generic Resource to specific types
 
 ### Loading & Parsing
-- **File Loading** - YAML and JSON parsing with format detection
+- **File Loading** - YAML and JSON parsing from file extensions
 - **Multi-Document Support** - Handle YAML documents separated by `---`
 - **Safety Limits** - File size, array size, nesting depth, timeout constraints
 - **Version Validation** - Check apiVersion is supported (currently draft only)

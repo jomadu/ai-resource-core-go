@@ -36,10 +36,10 @@ type LoadOptions struct {
 ```
 
 **Fields:**
-- `MaxFileSize` - Maximum file size in bytes (default: 1MB)
-- `MaxArraySize` - Maximum array length (default: 1000)
-- `MaxNestingDepth` - Maximum nesting depth (default: 10)
-- `Timeout` - Operation timeout (default: 5s)
+- `MaxFileSize` - Maximum file size in bytes (default: 10MB, for extreme cases only)
+- `MaxArraySize` - Maximum array length (default: 10000, for extreme cases only)
+- `MaxNestingDepth` - Maximum nesting depth (default: 100, for extreme cases only)
+- `Timeout` - Operation timeout (default: 30s)
 
 ### LoadOption
 ```go
@@ -58,7 +58,7 @@ type LoadOption func(*LoadOptions)
 
 1. Read file from path
 2. Check file size against limit
-3. Detect format (YAML vs JSON) from extension or content
+3. Detect format (YAML vs JSON) from file extension
 4. Parse into raw map structure
 5. Extract and validate apiVersion field
 6. Check apiVersion is in supported versions list
@@ -166,7 +166,7 @@ metadata:
   id: summarize
   name: Summarize Text
 spec:
-  body: "Summarize the following text:\n\n{{text}}"
+  body: "Summarize the following text in 3-5 sentences."
 ```
 
 ```go
@@ -268,7 +268,7 @@ err.Error() contains "exceeds size limit"
 
 ## Notes
 
-- File format detection prioritizes extension (.yaml, .yml, .json) but falls back to content sniffing
+- File format is determined by extension (.yaml, .yml, .json)
 - Multi-document support is YAML-only (JSON has no standard multi-document format)
 - Size limits prevent DoS attacks from maliciously large files
 - Timeout prevents hanging on slow filesystem operations
@@ -281,6 +281,7 @@ None.
 
 ## Areas for Improvement
 
+- Could add content sniffing as fallback for files without extensions
 - Could add streaming support for very large multi-document files
 - Could add caching for repeatedly loaded files
 - Could support loading from io.Reader for testing

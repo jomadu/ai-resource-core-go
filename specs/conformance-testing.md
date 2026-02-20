@@ -152,7 +152,7 @@ function test_invalid_case(case):
 |-----------|-------------------|
 | Missing test fixture | Skip test with warning |
 | Malformed test fixture | Fail test with parse error |
-| Test fixture with wrong extension | Detect format from content |
+| Test fixture with wrong extension | Fail with unsupported format error |
 | Empty test directory | Report 0 tests run |
 | Test timeout | Fail test with timeout error |
 | Unexpected panic | Catch and fail test gracefully |
@@ -163,15 +163,45 @@ function test_invalid_case(case):
 - `schema-validation.md` - Validate test cases
 - `semantic-validation.md` - Validate test cases
 - `fragment-resolution.md` - Test fragment resolution
-- Test fixtures from ai-resource-spec repository
+- Test fixtures from ai-resource-spec repository (via git submodule)
+
+## Test Fixture Management
+
+Test fixtures are maintained in the official ai-resource-spec repository and referenced via git submodule:
+
+```bash
+# Initial setup
+git submodule add https://github.com/org/ai-resource-spec testdata/spec
+git submodule update --init --recursive
+
+# Update to latest spec version
+cd testdata/spec
+git pull origin main
+cd ../..
+git add testdata/spec
+git commit -m "Update spec test fixtures to v1.2.3"
+```
+
+**Directory structure:**
+```
+testdata/
+  spec/              # Git submodule → ai-resource-spec repo
+    examples/
+      valid/
+      invalid/
+```
+
+**Benefits:**
+- Version-pinned test fixtures (reproducible builds)
+- Intentional updates when ready to test new spec versions
+- Works offline after initial clone
+- Standard Git tooling
 
 ## Implementation Mapping
 
 **Source files:**
 - `conformance_test.go` - Main conformance test suite
-- `testdata/valid/` - Valid test fixtures
-- `testdata/invalid/` - Invalid test fixtures
-- `testdata/examples/` - Example resources from spec
+- `testdata/spec/` - Git submodule to ai-resource-spec repository
 
 **Related specs:**
 - All specs - Conformance tests verify all functionality
@@ -333,14 +363,15 @@ All tests passed!
 
 ## Notes
 
-- Test fixtures should be copied from the ai-resource-spec repository
+- Test fixtures are managed via git submodule to ai-resource-spec repository
 - Tests should be organized by resource kind and validation type
 - Conformance tests are separate from unit tests
 - Tests should run quickly (< 1 second for full suite)
 - Failed tests should provide enough context to debug
 - Tests should be deterministic (no flaky tests)
-- New spec versions require updating test fixtures
+- Update submodule to test against new spec versions
 - Consider using table-driven tests for clarity
+- CI/CD should initialize submodules: `git submodule update --init --recursive`
 
 ## Known Issues
 

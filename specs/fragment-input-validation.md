@@ -43,76 +43,66 @@ type InputError struct {
 
 ## Algorithm
 
-1. Get fragment definition
-2. For each defined input:
-   - Check if provided in inputs
-   - If missing and required: error
-   - If missing and has default: apply default
-   - If provided: validate type
-3. For each provided input:
-   - Check if defined in fragment
-   - If not defined: error
-4. Return validated inputs with defaults applied
+1. Convert fragment input definitions to JSON Schema
+2. Apply default values for missing optional inputs
+3. Validate provided inputs against generated schema
+4. Check for undefined inputs (not in fragment definition)
+5. Return validated inputs with defaults applied
 
 **Pseudocode:**
 ```
 function ValidateInputs(fragmentID, fragment, providedInputs):
-    validated = {}
-    errors = []
+    // Convert InputDefinitions to JSON Schema
+    schema = buildSchemaFromInputs(fragment.Inputs)
     
-    // Check defined inputs
-    for name, definition in fragment.Inputs:
-        value = providedInputs[name]
-        
-        if value == nil:
-            if definition.Required:
-                errors.append("required input '{name}' not provided")
-                continue
-            if definition.Default != nil:
-                validated[name] = definition.Default
-                continue
-        else:
-            if not validate_type(value, definition):
-                errors.append("input '{name}' type mismatch")
-            else:
-                validated[name] = value
+    // Apply defaults
+    inputsWithDefaults = applyDefaults(providedInputs, fragment.Inputs)
+    
+    // Validate using JSON Schema library
+    result = validateJSONSchema(inputsWithDefaults, schema)
+    
+    if not result.Valid():
+        return nil, convertSchemaErrors(result.Errors(), fragmentID)
     
     // Check for undefined inputs
-    for name in providedInputs:
+    for name in inputsWithDefaults:
         if not fragment.Inputs[name]:
-            errors.append("undefined input '{name}'")
+            return nil, error("undefined input '{name}'")
     
-    if errors:
-        return nil, errors
-    
-    return validated, nil
+    return inputsWithDefaults, nil
 ```
 
-### Type Validation
+### Schema Conversion
 
 ```
-function validate_type(value, definition):
-    switch definition.Type:
-        case "string":
-            return is_string(value)
-        case "number":
-            return is_number(value)
-        case "boolean":
-            return is_boolean(value)
-        case "array":
-            if not is_array(value):
-                return false
-            for item in value:
-                if not validate_type(item, definition.Items):
-                    return false
-            return true
-        case "object":
-            if not is_object(value):
-                return false
-            for prop_name, prop_def in definition.Properties:
-                if not validate_type(value[prop_name], prop_def):
-                    return false
-            return true
+function buildSchemaFromInputs(inputs):
+    properties = {}
+    required = []
+    
+    for name, definition in inputs:
+        properties[name] = convertInputDefToSchema(definition)
+        if definition.Required:
+            required.append(name)
+    
+    return {
+        "type": "object",
+        "properties": properties,
+        "required": required,
+        "additionalProperties": false
+    }
+
+function convertInputDefToSchema(definition):
+    schema = {"type": definition.Type}
+    
+    if definition.Type == "array" and definition.Items:
+        schema["items"] = convertInputDefToSchema(definition.Items)
+    
+    if definition.Type == "object" and definition.Properties:
+        schema["properties"] = {}
+        for propName, propDef in definition.Properties:
+            schema["properties"][propName] = convertInputDefToSchema(propDef)
+    
+    return schema
 ```
 
 ## Edge Cases
@@ -135,16 +125,19 @@ function validate_type(value, definition):
 ## Dependencies
 
 - `core-types.md` - Fragment and InputDefinition types
+- `schema-validation.md` - Reuses JSON Schema validation library
 - `semantic-validation.md` - Calls this for fragment reference validation
 
 ## Implementation Mapping
 
 **Source files:**
 - `pkg/airesource/fragment.go` - ValidateInputs function
-- `internal/types/validator.go` - Type validation helpers
+- `internal/schema/converter.go` - InputDefinition to JSON Schema conversion
+- `internal/schema/validator.go` - Shared JSON Schema validator
 
 **Related specs:**
 - `core-types.md` - InputDefinition types
+- `schema-validation.md` - JSON Schema validation library
 - `fragment-resolution.md` - Uses validated inputs
 - `semantic-validation.md` - Validates fragment references exist
 - `error-handling.md` - InputError type
@@ -334,12 +327,14 @@ err.Message contains "undefined input 'extra'"
 ## Notes
 
 - Input validation happens before fragment resolution
+- InputDefinition structure maps directly to JSON Schema subset
+- Leverages existing JSON Schema validation library for consistency
 - Type validation is strict - no automatic coercion
-- Default values are applied only for missing optional inputs
-- Nested structures (arrays, objects) are validated recursively
+- Default values are applied before schema validation
+- Nested structures (arrays, objects) are validated by JSON Schema recursively
 - Validation errors should be collected and returned together
 - The validated inputs map includes both provided and default values
-- Extra inputs not in the definition are rejected to catch typos
+- Extra inputs not in the definition are rejected to catch typos (additionalProperties: false)
 
 ## Known Issues
 
@@ -348,6 +343,6 @@ None.
 ## Areas for Improvement
 
 - Could add type coercion (e.g., "123" to 123) with opt-in flag
-- Could add validation for additional constraints (min, max, pattern)
+- Could support additional JSON Schema constraints (min, max, pattern, format)
 - Could provide better error messages for nested validation failures
-- Could add support for union types in future versions
+- Could cache generated schemas for performance
