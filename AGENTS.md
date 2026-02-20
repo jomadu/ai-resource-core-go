@@ -2,7 +2,7 @@
 
 ## Work Tracking System
 
-Tasks are tracked in `TASK.md` at repository root.
+Tasks are tracked in `TODO.md` at repository root.
 
 Task format:
 ```markdown
@@ -15,9 +15,13 @@ Task format:
 
 Manual editing. Tasks auto-increment. Keep all tasks (including DONE) in file.
 
+## Feature Input
+
+`TASK.md` contains feature requirements and specifications for rooda.
+
 ## Quick Reference
 
-- Edit `TASK.md` - Manage tasks
+- Edit `TODO.md` - Manage tasks
 - `go test ./...` - Run tests (when initialized)
 - `go build ./...` - Build packages (when initialized)
 
@@ -78,7 +82,6 @@ Audit results written to `AUDIT.md` at repository root.
 Last verified: 2026-02-20
 
 **Working:**
-- `bd` command available for task tracking
 - Specification structure in `specs/` directory
 - TASK.md defines implementation plan
 
