@@ -2,23 +2,24 @@
 
 ## Work Tracking System
 
-Use `bd` for task tracking.
+Tasks are tracked in `TASK.md` at repository root.
 
-Commands:
-- `bd query` - List tasks
-- `bd update <id>` - Update task status
-- `bd close <id>` - Close task
-- `bd create` - Create new task
+Task format:
+```markdown
+## TASK-001
+- Priority: 1-5 (1=highest)
+- Status: TODO/IN_PROGRESS/BLOCKED/DONE
+- Dependencies: [TASK-XXX, ...]
+- Description: Task description
+```
+
+Manual editing. Tasks auto-increment. Keep all tasks (including DONE) in file.
 
 ## Quick Reference
 
-- `bd query` - List tasks
+- Edit `TASK.md` - Manage tasks
 - `go test ./...` - Run tests (when initialized)
 - `go build ./...` - Build packages (when initialized)
-
-## Task Input
-
-Tasks are defined in `TASK.md` at repository root.
 
 ## Planning System
 
