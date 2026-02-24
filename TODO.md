@@ -40,6 +40,6 @@
 
 ## TASK-007
 - Priority: 3
-- Status: TODO
+- Status: DONE
 - Dependencies: [TASK-006]
 - Description: Remove working documents: `docs/body-type-design.md` and `ISSUES.md` after all specification tasks complete. These are temporary design documents per ISSUES.md decision log.
