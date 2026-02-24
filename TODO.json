@@ -81,10 +81,20 @@
     {
       "id": "TASK-005",
       "priority": 2,
-      "status": "TODO",
+      "status": "DONE",
       "dependencies": ["TASK-001", "TASK-002", "TASK-004"],
       "description": "Implement Fragment Input Validation (fragment-input-validation.md) - InputDefinition to JSON Schema conversion, type validation",
-      "comments": []
+      "comments": [
+        "Completed: Added ValidateInputs function to pkg/airesource/fragment.go",
+        "Implemented BuildSchemaFromInputs for InputDefinition to JSON Schema conversion",
+        "Validates string, number, boolean, array, and object types",
+        "Applies default values for missing optional inputs",
+        "Checks for required inputs and undefined inputs",
+        "Returns InputError with expected vs actual types for mismatches",
+        "Recursively validates nested arrays and objects",
+        "All tests pass: go test ./...",
+        "Passes go build and go vet"
+      ]
     },
     {
       "id": "TASK-006",
