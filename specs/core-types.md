@@ -182,9 +182,15 @@ const (
 
 ### Body
 ```go
-type Body interface{}
+type Body struct {
+    String *string
+    Array  []BodyItem
+}
 
-type BodyItem interface{}
+type BodyItem struct {
+    String      *string
+    FragmentRef *FragmentRef
+}
 
 type FragmentRef struct {
     Fragment string
@@ -193,9 +199,15 @@ type FragmentRef struct {
 ```
 
 **Body formats:**
-- Simple string: `"text content"`
-- Array of strings: `["text1", "text2"]`
-- Array with fragment refs: `[{fragment: "id", inputs: {...}}, "text"]`
+- Simple string: Body with String field set
+- Array of strings: Body with Array field containing BodyItems with String set
+- Array with fragment refs: Body with Array field containing BodyItems with FragmentRef set
+
+**Type invariants:**
+- Exactly one of Body.String or Body.Array must be non-nil
+- Exactly one of BodyItem.String or BodyItem.FragmentRef must be non-nil
+
+**Implementation note:** Requires custom YAML unmarshaling to populate the appropriate field based on YAML structure.
 
 ## Algorithm
 
@@ -297,13 +309,47 @@ fragment := Fragment{
 - Compile-time type safety for InputType constants
 - Runtime validation of default value types (separate spec)
 
+### Example 3: Body Type Usage
+
+**Input:**
+```go
+// String body
+body := Body{
+    String: stringPtr("Simple text"),
+}
+
+// Array body with mixed content
+body := Body{
+    Array: []BodyItem{
+        {String: stringPtr("Introduction")},
+        {FragmentRef: &FragmentRef{
+            Fragment: "greet",
+            Inputs: map[string]interface{}{"name": "World"},
+        }},
+        {String: stringPtr("Conclusion")},
+    },
+}
+```
+
+**Expected Output:**
+- Type-safe construction of Body values
+- Compile-time enforcement of union invariants
+- Clear distinction between string and array bodies
+
+**Verification:**
+- Body.String and Body.Array are mutually exclusive
+- BodyItem.String and BodyItem.FragmentRef are mutually exclusive
+- No runtime type assertions needed for consumers
+
 ## Notes
 
 - The type system prioritizes clarity over clever abstractions
-- `interface{}` is used for `Spec`, `Body`, and `Default` because these have dynamic structure determined by kind/type
+- `interface{}` is used for `Spec` and `Default` because these have dynamic structure determined by kind/type
+- Body uses explicit union type (struct with String/Array fields) for compile-time safety instead of interface{}
 - Type accessors provide safe conversion from generic Resource to specific types
 - Pattern validation for metadata.ID is enforced during validation, not in the type system
 - Rule priority default (100) is applied during parsing, not in the type definition
+- Custom YAML unmarshaling is required for Body and BodyItem to populate the correct field based on YAML structure
 
 ## Known Issues
 
@@ -312,4 +358,4 @@ None.
 ## Areas for Improvement
 
 - Consider using generics for type-safe resource loading when Go 1.18+ is baseline
-- Could use sum types if Go adds discriminated unions in future
+- Body type provides compile-time safety; future versions could explore similar patterns for Spec field if Go adds discriminated unions
