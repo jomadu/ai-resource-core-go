@@ -1,0 +1,76 @@
+{
+  "tasks": [
+    {
+      "id": "TASK-000",
+      "priority": 1,
+      "status": "TODO",
+      "dependencies": [],
+      "description": "Bootstrap Go project (go mod init, create directory structure, add dependencies)",
+      "comments": []
+    },
+    {
+      "id": "TASK-001",
+      "priority": 1,
+      "status": "TODO",
+      "dependencies": ["TASK-000"],
+      "description": "Implement Core Types (core-types.md) - Resource envelope, Kind constants, Metadata, Prompt/Promptset/Rule/Ruleset types",
+      "comments": []
+    },
+    {
+      "id": "TASK-002",
+      "priority": 1,
+      "status": "TODO",
+      "dependencies": ["TASK-001"],
+      "description": "Implement Error Handling (error-handling.md) - ValidationError, SchemaError, FragmentError, MultiError types",
+      "comments": []
+    },
+    {
+      "id": "TASK-003",
+      "priority": 1,
+      "status": "TODO",
+      "dependencies": ["TASK-001", "TASK-002"],
+      "description": "Implement Resource Loading (resource-loading.md) - YAML/JSON parsing, multi-document support, LoadResource/LoadResources functions",
+      "comments": []
+    },
+    {
+      "id": "TASK-004",
+      "priority": 2,
+      "status": "TODO",
+      "dependencies": ["TASK-001", "TASK-002"],
+      "description": "Implement Schema Validation (schema-validation.md) - Embedded JSON schemas, validator integration, pattern/enum validation",
+      "comments": []
+    },
+    {
+      "id": "TASK-005",
+      "priority": 2,
+      "status": "TODO",
+      "dependencies": ["TASK-001", "TASK-002", "TASK-004"],
+      "description": "Implement Fragment Input Validation (fragment-input-validation.md) - InputDefinition to JSON Schema conversion, type validation",
+      "comments": []
+    },
+    {
+      "id": "TASK-006",
+      "priority": 2,
+      "status": "TODO",
+      "dependencies": ["TASK-001", "TASK-004", "TASK-005"],
+      "description": "Implement Semantic Validation (semantic-validation.md) - Fragment reference checking, collection validation, scope validation",
+      "comments": []
+    },
+    {
+      "id": "TASK-007",
+      "priority": 3,
+      "status": "TODO",
+      "dependencies": ["TASK-001", "TASK-005"],
+      "description": "Implement Fragment Resolution (fragment-resolution.md) - Body type detection, Mustache rendering, ResolveBody function",
+      "comments": []
+    },
+    {
+      "id": "TASK-008",
+      "priority": 4,
+      "status": "TODO",
+      "dependencies": ["TASK-001", "TASK-002", "TASK-003", "TASK-004", "TASK-005", "TASK-006", "TASK-007"],
+      "description": "Implement Conformance Testing (conformance-testing.md) - Test fixture discovery, valid/invalid case testing, CI/CD integration",
+      "comments": []
+    }
+  ]
+}

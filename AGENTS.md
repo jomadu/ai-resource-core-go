@@ -2,16 +2,27 @@
 
 ## Work Tracking System
 
-Tasks are tracked in `TODO.md` at repository root.
+Tasks are tracked in `TODO.json` at repository root.
 
 Task format:
-```markdown
-## TASK-001
-- Priority: 1-5 (1=highest)
-- Status: TODO/IN_PROGRESS/BLOCKED/DONE
-- Dependencies: [TASK-XXX, ...]
-- Description: Task description
+```json
+{
+  "id": "TASK-001",
+  "priority": 1,
+  "status": "TODO",
+  "dependencies": ["TASK-XXX"],
+  "description": "Task description",
+  "comments": []
+}
 ```
+
+Fields:
+- `id`: Task identifier (TASK-XXX)
+- `priority`: 1-5 (1=highest)
+- `status`: TODO/IN_PROGRESS/BLOCKED/DONE
+- `dependencies`: Array of task IDs
+- `description`: Task description
+- `comments`: Array of implementation notes (agents append as needed)
 
 Manual editing. Tasks auto-increment. Keep all tasks (including DONE) in file.
 
@@ -21,7 +32,10 @@ Manual editing. Tasks auto-increment. Keep all tasks (including DONE) in file.
 
 ## Quick Reference
 
-- Edit `TODO.md` - Manage tasks
+- Edit `TODO.json` - Manage tasks
+- `jq '.tasks[] | select(.id == "TASK-XXX")' TODO.json` - Show single task
+- `jq '.tasks[] | select(.status != "DONE")' TODO.json` - List incomplete tasks
+- `jq '.tasks[] | select(.status == "TODO" and (.dependencies | length == 0 or all(. as $dep | any($dep == .tasks[].id and .tasks[].status == "DONE"))))' TODO.json` - List ready tasks
 - `go test ./...` - Run tests (when initialized)
 - `go build ./...` - Build packages (when initialized)
 
