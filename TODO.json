@@ -119,10 +119,19 @@
     {
       "id": "TASK-007",
       "priority": 3,
-      "status": "TODO",
+      "status": "DONE",
       "dependencies": ["TASK-001", "TASK-005"],
       "description": "Implement Fragment Resolution (fragment-resolution.md) - Body type detection, Mustache rendering, ResolveBody function",
-      "comments": []
+      "comments": [
+        "Completed: Added ResolveBody function to pkg/airesource/fragment.go",
+        "Implemented body type detection (String vs Array)",
+        "Integrated mustache library for template rendering",
+        "Fragment reference lookup with clear error messages",
+        "Parts joined with double newline separator",
+        "Added comprehensive tests covering all spec examples",
+        "All tests pass: go test ./...",
+        "Passes go build and go vet"
+      ]
     },
     {
       "id": "TASK-008",

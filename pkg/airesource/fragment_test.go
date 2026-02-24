@@ -204,3 +204,203 @@ func TestValidateInputs_MissingRequired(t *testing.T) {
 		t.Errorf("expected Got='missing', got %s", inputErr.Got)
 	}
 }
+
+func TestResolveBody_SimpleString(t *testing.T) {
+	body := Body{
+		String: stringPtr("Simple text body"),
+	}
+
+	result, err := ResolveBody(body, nil)
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+
+	if result != "Simple text body" {
+		t.Errorf("expected 'Simple text body', got %s", result)
+	}
+}
+
+func TestResolveBody_FragmentReference(t *testing.T) {
+	fragments := map[string]Fragment{
+		"greet": {
+			Body: "Hello, {{name}}!",
+		},
+	}
+
+	body := Body{
+		Array: []BodyItem{
+			{
+				FragmentRef: &FragmentRef{
+					Fragment: "greet",
+					Inputs: map[string]interface{}{
+						"name": "World",
+					},
+				},
+			},
+		},
+	}
+
+	result, err := ResolveBody(body, fragments)
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+
+	if result != "Hello, World!" {
+		t.Errorf("expected 'Hello, World!', got %s", result)
+	}
+}
+
+func TestResolveBody_MixedArray(t *testing.T) {
+	fragments := map[string]Fragment{
+		"read": {
+			Body: "Read file: {{path}}",
+		},
+	}
+
+	body := Body{
+		Array: []BodyItem{
+			{String: stringPtr("Introduction text")},
+			{
+				FragmentRef: &FragmentRef{
+					Fragment: "read",
+					Inputs: map[string]interface{}{
+						"path": "data.txt",
+					},
+				},
+			},
+			{String: stringPtr("Conclusion text")},
+		},
+	}
+
+	result, err := ResolveBody(body, fragments)
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+
+	expected := "Introduction text\n\nRead file: data.txt\n\nConclusion text"
+	if result != expected {
+		t.Errorf("expected %q, got %q", expected, result)
+	}
+}
+
+func TestResolveBody_MustacheConditional(t *testing.T) {
+	fragments := map[string]Fragment{
+		"conditional": {
+			Body: "{{#show}}This is shown{{/show}}{{^show}}This is hidden{{/show}}",
+		},
+	}
+
+	body := Body{
+		Array: []BodyItem{
+			{
+				FragmentRef: &FragmentRef{
+					Fragment: "conditional",
+					Inputs: map[string]interface{}{
+						"show": true,
+					},
+				},
+			},
+		},
+	}
+
+	result, err := ResolveBody(body, fragments)
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+
+	if result != "This is shown" {
+		t.Errorf("expected 'This is shown', got %s", result)
+	}
+}
+
+func TestResolveBody_MustacheArrayIteration(t *testing.T) {
+	fragments := map[string]Fragment{
+		"list": {
+			Body: "Files:\n{{#files}}- {{.}}\n{{/files}}",
+		},
+	}
+
+	body := Body{
+		Array: []BodyItem{
+			{
+				FragmentRef: &FragmentRef{
+					Fragment: "list",
+					Inputs: map[string]interface{}{
+						"files": []string{"a.txt", "b.txt", "c.txt"},
+					},
+				},
+			},
+		},
+	}
+
+	result, err := ResolveBody(body, fragments)
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+
+	expected := "Files:\n- a.txt\n- b.txt\n- c.txt\n"
+	if result != expected {
+		t.Errorf("expected %q, got %q", expected, result)
+	}
+}
+
+func TestResolveBody_FragmentNotFound(t *testing.T) {
+	body := Body{
+		Array: []BodyItem{
+			{
+				FragmentRef: &FragmentRef{
+					Fragment: "missing",
+					Inputs:   map[string]interface{}{},
+				},
+			},
+		},
+	}
+
+	_, err := ResolveBody(body, map[string]Fragment{})
+	if err == nil {
+		t.Fatal("expected error, got nil")
+	}
+
+	fragErr, ok := err.(*FragmentError)
+	if !ok {
+		t.Fatalf("expected FragmentError, got %T", err)
+	}
+
+	if fragErr.FragmentID != "missing" {
+		t.Errorf("expected FragmentID='missing', got %s", fragErr.FragmentID)
+	}
+
+	if fragErr.Message != "fragment not found" {
+		t.Errorf("expected Message='fragment not found', got %s", fragErr.Message)
+	}
+}
+
+func TestResolveBody_EmptyArray(t *testing.T) {
+	body := Body{
+		Array: []BodyItem{},
+	}
+
+	result, err := ResolveBody(body, nil)
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+
+	if result != "" {
+		t.Errorf("expected empty string, got %s", result)
+	}
+}
+
+func TestResolveBody_EmptyString(t *testing.T) {
+	body := Body{
+		String: stringPtr(""),
+	}
+
+	result, err := ResolveBody(body, nil)
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+
+	if result != "" {
+		t.Errorf("expected empty string, got %s", result)
+	}
+}

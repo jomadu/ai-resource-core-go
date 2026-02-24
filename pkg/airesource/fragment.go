@@ -1,6 +1,11 @@
 package airesource
 
-import "encoding/json"
+import (
+	"encoding/json"
+	"strings"
+
+	"github.com/cbroglie/mustache"
+)
 
 // Fragment represents a reusable template with typed inputs.
 type Fragment struct {
@@ -333,4 +338,49 @@ func getTypeName(value interface{}) string {
 	default:
 		return "unknown"
 	}
+}
+
+// ResolveBody resolves a body by processing fragment references and rendering templates.
+// Returns the final rendered string.
+func ResolveBody(body Body, fragments map[string]Fragment) (string, error) {
+	if body.String != nil {
+		return *body.String, nil
+	}
+
+	if body.Array == nil {
+		return "", &FragmentError{
+			Message: "body must have String or Array set",
+		}
+	}
+
+	var parts []string
+	for _, item := range body.Array {
+		if item.String != nil {
+			parts = append(parts, *item.String)
+		} else if item.FragmentRef != nil {
+			fragment, exists := fragments[item.FragmentRef.Fragment]
+			if !exists {
+				return "", &FragmentError{
+					FragmentID: item.FragmentRef.Fragment,
+					Message:    "fragment not found",
+				}
+			}
+
+			rendered, err := mustache.Render(fragment.Body, item.FragmentRef.Inputs)
+			if err != nil {
+				return "", &FragmentError{
+					FragmentID: item.FragmentRef.Fragment,
+					Message:    "template rendering failed",
+					Cause:      err,
+				}
+			}
+			parts = append(parts, rendered)
+		} else {
+			return "", &FragmentError{
+				Message: "BodyItem must have String or FragmentRef set",
+			}
+		}
+	}
+
+	return strings.Join(parts, "\n\n"), nil
 }
