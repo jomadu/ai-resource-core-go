@@ -1,0 +1,8 @@
+apiVersion: ai-resource/draft
+kind: Rule
+metadata:
+  id: test-rule
+  name: Test Rule
+spec:
+  enforcement: must
+  body: "This is a test rule"

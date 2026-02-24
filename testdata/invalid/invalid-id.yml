@@ -1,0 +1,7 @@
+apiVersion: ai-resource/draft
+kind: Prompt
+metadata:
+  id: "invalid id with spaces"
+  name: Test
+spec:
+  body: "Test"

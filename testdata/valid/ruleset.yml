@@ -1,0 +1,10 @@
+apiVersion: ai-resource/draft
+kind: Ruleset
+metadata:
+  id: test-ruleset
+  name: Test Ruleset
+spec:
+  rules:
+    main:
+      enforcement: must
+      body: "Main rule"
