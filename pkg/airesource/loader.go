@@ -8,6 +8,8 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/aws/ai-resource-core-go/internal/schema"
+
 	"gopkg.in/yaml.v3"
 )
 
@@ -59,6 +61,10 @@ func LoadResource(path string, opts ...LoadOption) (*Resource, error) {
 
 	if resource.Kind == "" {
 		return nil, &LoadError{Path: path, Message: "missing required field: kind"}
+	}
+
+	if err := schema.ValidateSchema(&resource); err != nil {
+		return nil, err
 	}
 
 	return &resource, nil
@@ -130,6 +136,10 @@ func LoadResources(path string, opts ...LoadOption) ([]*Resource, error) {
 				Path:    path,
 				Message: fmt.Sprintf("document %d: missing required field: kind", len(resources)+1),
 			}
+		}
+
+		if err := schema.ValidateSchema(&resource); err != nil {
+			return nil, err
 		}
 
 		resources = append(resources, &resource)

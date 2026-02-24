@@ -7,10 +7,10 @@ import (
 
 // Resource represents the generic envelope for all AI resources.
 type Resource struct {
-	APIVersion string      `yaml:"apiVersion"`
-	Kind       Kind        `yaml:"kind"`
-	Metadata   Metadata    `yaml:"metadata"`
-	Spec       interface{} `yaml:"spec"`
+	APIVersion string      `yaml:"apiVersion" json:"apiVersion"`
+	Kind       Kind        `yaml:"kind" json:"kind"`
+	Metadata   Metadata    `yaml:"metadata" json:"metadata"`
+	Spec       interface{} `yaml:"spec" json:"spec"`
 }
 
 // Kind represents the type of AI resource.
@@ -25,9 +25,9 @@ const (
 
 // Metadata contains identifying information for a resource.
 type Metadata struct {
-	ID          string `yaml:"id"`
-	Name        string `yaml:"name,omitempty"`
-	Description string `yaml:"description,omitempty"`
+	ID          string `yaml:"id" json:"id"`
+	Name        string `yaml:"name,omitempty" json:"name,omitempty"`
+	Description string `yaml:"description,omitempty" json:"description,omitempty"`
 }
 
 // AsPrompt returns the resource as a Prompt if the kind matches.

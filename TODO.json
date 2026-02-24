@@ -63,10 +63,20 @@
     {
       "id": "TASK-004",
       "priority": 2,
-      "status": "TODO",
+      "status": "DONE",
       "dependencies": ["TASK-001", "TASK-002"],
       "description": "Implement Schema Validation (schema-validation.md) - Embedded JSON schemas, validator integration, pattern/enum validation",
-      "comments": []
+      "comments": [
+        "Completed: Created internal/schema/{schemas.go,validator.go,validator_test.go}",
+        "Embedded JSON schemas for Prompt, Promptset, Rule, Ruleset",
+        "Implemented ValidateSchema function with gojsonschema integration",
+        "Returns SchemaError with field paths for validation failures",
+        "Returns MultiError for multiple validation errors",
+        "Integrated schema validation into LoadResource and LoadResources",
+        "Added JSON tags to Resource and Metadata structs for proper marshaling",
+        "All tests pass: go test ./...",
+        "Passes go build and go vet"
+      ]
     },
     {
       "id": "TASK-005",
