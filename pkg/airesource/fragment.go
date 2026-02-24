@@ -1,5 +1,7 @@
 package airesource
 
+import "encoding/json"
+
 // Fragment represents a reusable template with typed inputs.
 type Fragment struct {
 	Inputs map[string]InputDefinition `yaml:"inputs,omitempty"`
@@ -50,6 +52,23 @@ func (b *Body) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	return &ValidationError{Field: "body", Message: "must be string or array"}
 }
 
+// UnmarshalJSON implements custom JSON unmarshaling for Body.
+func (b *Body) UnmarshalJSON(data []byte) error {
+	var s string
+	if err := json.Unmarshal(data, &s); err == nil {
+		b.String = &s
+		return nil
+	}
+
+	var arr []BodyItem
+	if err := json.Unmarshal(data, &arr); err == nil {
+		b.Array = arr
+		return nil
+	}
+
+	return &ValidationError{Field: "body", Message: "must be string or array"}
+}
+
 // BodyItem represents an item in a body array.
 // Exactly one of String or FragmentRef must be non-nil.
 type BodyItem struct {
@@ -67,6 +86,23 @@ func (bi *BodyItem) UnmarshalYAML(unmarshal func(interface{}) error) error {
 
 	var ref FragmentRef
 	if err := unmarshal(&ref); err == nil {
+		bi.FragmentRef = &ref
+		return nil
+	}
+
+	return &ValidationError{Field: "body item", Message: "must be string or fragment reference"}
+}
+
+// UnmarshalJSON implements custom JSON unmarshaling for BodyItem.
+func (bi *BodyItem) UnmarshalJSON(data []byte) error {
+	var s string
+	if err := json.Unmarshal(data, &s); err == nil {
+		bi.String = &s
+		return nil
+	}
+
+	var ref FragmentRef
+	if err := json.Unmarshal(data, &ref); err == nil {
 		bi.FragmentRef = &ref
 		return nil
 	}

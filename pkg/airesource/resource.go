@@ -1,6 +1,9 @@
 package airesource
 
-import "fmt"
+import (
+	"encoding/json"
+	"fmt"
+)
 
 // Resource represents the generic envelope for all AI resources.
 type Resource struct {
@@ -32,11 +35,17 @@ func (r *Resource) AsPrompt() (*Prompt, error) {
 	if r.Kind != KindPrompt {
 		return nil, fmt.Errorf("expected kind Prompt, got %s", r.Kind)
 	}
+	
+	var spec PromptSpec
+	if err := remarshal(r.Spec, &spec); err != nil {
+		return nil, fmt.Errorf("invalid Prompt spec: %w", err)
+	}
+	
 	return &Prompt{
 		APIVersion: r.APIVersion,
 		Kind:       r.Kind,
 		Metadata:   r.Metadata,
-		Spec:       r.Spec.(PromptSpec),
+		Spec:       spec,
 	}, nil
 }
 
@@ -45,11 +54,17 @@ func (r *Resource) AsPromptset() (*Promptset, error) {
 	if r.Kind != KindPromptset {
 		return nil, fmt.Errorf("expected kind Promptset, got %s", r.Kind)
 	}
+	
+	var spec PromptsetSpec
+	if err := remarshal(r.Spec, &spec); err != nil {
+		return nil, fmt.Errorf("invalid Promptset spec: %w", err)
+	}
+	
 	return &Promptset{
 		APIVersion: r.APIVersion,
 		Kind:       r.Kind,
 		Metadata:   r.Metadata,
-		Spec:       r.Spec.(PromptsetSpec),
+		Spec:       spec,
 	}, nil
 }
 
@@ -58,11 +73,17 @@ func (r *Resource) AsRule() (*Rule, error) {
 	if r.Kind != KindRule {
 		return nil, fmt.Errorf("expected kind Rule, got %s", r.Kind)
 	}
+	
+	var spec RuleSpec
+	if err := remarshal(r.Spec, &spec); err != nil {
+		return nil, fmt.Errorf("invalid Rule spec: %w", err)
+	}
+	
 	return &Rule{
 		APIVersion: r.APIVersion,
 		Kind:       r.Kind,
 		Metadata:   r.Metadata,
-		Spec:       r.Spec.(RuleSpec),
+		Spec:       spec,
 	}, nil
 }
 
@@ -71,10 +92,24 @@ func (r *Resource) AsRuleset() (*Ruleset, error) {
 	if r.Kind != KindRuleset {
 		return nil, fmt.Errorf("expected kind Ruleset, got %s", r.Kind)
 	}
+	
+	var spec RulesetSpec
+	if err := remarshal(r.Spec, &spec); err != nil {
+		return nil, fmt.Errorf("invalid Ruleset spec: %w", err)
+	}
+	
 	return &Ruleset{
 		APIVersion: r.APIVersion,
 		Kind:       r.Kind,
 		Metadata:   r.Metadata,
-		Spec:       r.Spec.(RulesetSpec),
+		Spec:       spec,
 	}, nil
+}
+
+func remarshal(from, to interface{}) error {
+	data, err := json.Marshal(from)
+	if err != nil {
+		return err
+	}
+	return json.Unmarshal(data, to)
 }

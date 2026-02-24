@@ -45,10 +45,20 @@
     {
       "id": "TASK-003",
       "priority": 1,
-      "status": "TODO",
+      "status": "DONE",
       "dependencies": ["TASK-001", "TASK-002"],
       "description": "Implement Resource Loading (resource-loading.md) - YAML/JSON parsing, multi-document support, LoadResource/LoadResources functions",
-      "comments": []
+      "comments": [
+        "Completed: Created pkg/airesource/{options,version,loader}.go",
+        "Implemented LoadResource, LoadResources, LoadPrompt, LoadPromptset, LoadRule, LoadRuleset",
+        "Added LoadOptions with functional options pattern (WithMaxFileSize, etc.)",
+        "Supports YAML and JSON parsing, multi-document YAML files",
+        "Version validation with clear error messages",
+        "File size limits and safety checks",
+        "Added JSON unmarshaling to Body and BodyItem types for remarshal support",
+        "All tests pass: go test ./...",
+        "Passes go build and go vet"
+      ]
     },
     {
       "id": "TASK-004",
