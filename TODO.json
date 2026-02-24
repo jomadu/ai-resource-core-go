@@ -99,10 +99,22 @@
     {
       "id": "TASK-006",
       "priority": 2,
-      "status": "TODO",
+      "status": "DONE",
       "dependencies": ["TASK-001", "TASK-004", "TASK-005"],
       "description": "Implement Semantic Validation (semantic-validation.md) - Fragment reference checking, collection validation, scope validation",
-      "comments": []
+      "comments": [
+        "Completed: Created pkg/airesource/{validator.go,validator_test.go}",
+        "Implemented ValidateSemantic function with pattern validation for IDs and collection keys",
+        "Validates fragment references exist and inputs are valid",
+        "Validates collections (prompts, rules) have minimum 1 item",
+        "Validates metadata.id and fragment/collection keys match ^[a-zA-Z0-9_-]+$",
+        "Validates body structure (string or array with valid items)",
+        "Integrated into LoadResource and LoadResources after schema validation",
+        "Added MarshalJSON methods to Body and BodyItem for remarshal support",
+        "Added JSON tags to all spec types for proper marshaling",
+        "All tests pass: go test ./...",
+        "Passes go build and go vet"
+      ]
     },
     {
       "id": "TASK-007",

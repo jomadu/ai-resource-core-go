@@ -67,6 +67,10 @@ func LoadResource(path string, opts ...LoadOption) (*Resource, error) {
 		return nil, err
 	}
 
+	if err := ValidateSemantic(&resource); err != nil {
+		return nil, err
+	}
+
 	return &resource, nil
 }
 
@@ -139,6 +143,10 @@ func LoadResources(path string, opts ...LoadOption) ([]*Resource, error) {
 		}
 
 		if err := schema.ValidateSchema(&resource); err != nil {
+			return nil, err
+		}
+
+		if err := ValidateSemantic(&resource); err != nil {
 			return nil, err
 		}
 

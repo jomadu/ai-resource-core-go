@@ -4,17 +4,17 @@ import "encoding/json"
 
 // Fragment represents a reusable template with typed inputs.
 type Fragment struct {
-	Inputs map[string]InputDefinition `yaml:"inputs,omitempty"`
-	Body   string                     `yaml:"body"`
+	Inputs map[string]InputDefinition `yaml:"inputs,omitempty" json:"inputs,omitempty"`
+	Body   string                     `yaml:"body" json:"body"`
 }
 
 // InputDefinition defines the type and constraints for a fragment input.
 type InputDefinition struct {
-	Type       InputType                  `yaml:"type"`
-	Required   bool                       `yaml:"required,omitempty"`
-	Default    interface{}                `yaml:"default,omitempty"`
-	Items      *InputDefinition           `yaml:"items,omitempty"`
-	Properties map[string]InputDefinition `yaml:"properties,omitempty"`
+	Type       InputType                  `yaml:"type" json:"type"`
+	Required   bool                       `yaml:"required,omitempty" json:"required,omitempty"`
+	Default    interface{}                `yaml:"default,omitempty" json:"default,omitempty"`
+	Items      *InputDefinition           `yaml:"items,omitempty" json:"items,omitempty"`
+	Properties map[string]InputDefinition `yaml:"properties,omitempty" json:"properties,omitempty"`
 }
 
 // InputType represents the type of a fragment input.
@@ -50,6 +50,17 @@ func (b *Body) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	}
 
 	return &ValidationError{Field: "body", Message: "must be string or array"}
+}
+
+// MarshalJSON implements custom JSON marshaling for Body.
+func (b Body) MarshalJSON() ([]byte, error) {
+	if b.String != nil {
+		return json.Marshal(*b.String)
+	}
+	if b.Array != nil {
+		return json.Marshal(b.Array)
+	}
+	return []byte("null"), nil
 }
 
 // UnmarshalJSON implements custom JSON unmarshaling for Body.
@@ -91,6 +102,17 @@ func (bi *BodyItem) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	}
 
 	return &ValidationError{Field: "body item", Message: "must be string or fragment reference"}
+}
+
+// MarshalJSON implements custom JSON marshaling for BodyItem.
+func (bi BodyItem) MarshalJSON() ([]byte, error) {
+	if bi.String != nil {
+		return json.Marshal(*bi.String)
+	}
+	if bi.FragmentRef != nil {
+		return json.Marshal(bi.FragmentRef)
+	}
+	return []byte("null"), nil
 }
 
 // UnmarshalJSON implements custom JSON unmarshaling for BodyItem.
@@ -156,8 +178,8 @@ func convertInputDefToSchema(def InputDefinition) map[string]interface{} {
 }
 
 type FragmentRef struct {
-	Fragment string                 `yaml:"fragment"`
-	Inputs   map[string]interface{} `yaml:"inputs,omitempty"`
+	Fragment string                 `yaml:"fragment" json:"fragment"`
+	Inputs   map[string]interface{} `yaml:"inputs,omitempty" json:"inputs,omitempty"`
 }
 
 // ValidateInputs validates provided inputs against fragment input definitions.

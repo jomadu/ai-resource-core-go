@@ -10,10 +10,10 @@ type Rule struct {
 
 // RuleSpec defines the specification for a Rule.
 type RuleSpec struct {
-	Fragments   map[string]Fragment `yaml:"fragments,omitempty"`
-	Enforcement Enforcement         `yaml:"enforcement,omitempty"`
-	Scope       []ScopeEntry        `yaml:"scope,omitempty"`
-	Body        Body                `yaml:"body"`
+	Fragments   map[string]Fragment `yaml:"fragments,omitempty" json:"fragments,omitempty"`
+	Enforcement Enforcement         `yaml:"enforcement,omitempty" json:"enforcement,omitempty"`
+	Scope       []ScopeEntry        `yaml:"scope,omitempty" json:"scope,omitempty"`
+	Body        Body                `yaml:"body" json:"body"`
 }
 
 // Enforcement represents the enforcement level of a rule.
@@ -40,16 +40,16 @@ type Ruleset struct {
 
 // RulesetSpec defines the specification for a Ruleset.
 type RulesetSpec struct {
-	Fragments map[string]Fragment  `yaml:"fragments,omitempty"`
-	Rules     map[string]RuleItem  `yaml:"rules"`
+	Fragments map[string]Fragment  `yaml:"fragments,omitempty" json:"fragments,omitempty"`
+	Rules     map[string]RuleItem  `yaml:"rules" json:"rules"`
 }
 
 // RuleItem represents a rule within a ruleset.
 type RuleItem struct {
-	Name        string      `yaml:"name,omitempty"`
-	Description string      `yaml:"description,omitempty"`
-	Priority    int         `yaml:"priority,omitempty"`
-	Enforcement Enforcement `yaml:"enforcement,omitempty"`
-	Scope       []ScopeEntry `yaml:"scope,omitempty"`
-	Body        Body        `yaml:"body"`
+	Name        string      `yaml:"name,omitempty" json:"name,omitempty"`
+	Description string      `yaml:"description,omitempty" json:"description,omitempty"`
+	Priority    int         `yaml:"priority,omitempty" json:"priority,omitempty"`
+	Enforcement Enforcement `yaml:"enforcement,omitempty" json:"enforcement,omitempty"`
+	Scope       []ScopeEntry `yaml:"scope,omitempty" json:"scope,omitempty"`
+	Body        Body        `yaml:"body" json:"body"`
 }
