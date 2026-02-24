@@ -22,7 +22,7 @@
 
 ## TASK-004
 - Priority: 1
-- Status: TODO
+- Status: DONE
 - Dependencies: []
 - Description: Update `core-types.md` to replace `Body interface{}` with explicit union type. See ISSUES.md Issue #3 and `docs/body-type-design.md` for design details and rationale.
 
