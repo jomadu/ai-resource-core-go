@@ -3,10 +3,14 @@
     {
       "id": "TASK-000",
       "priority": 1,
-      "status": "TODO",
+      "status": "DONE",
       "dependencies": [],
       "description": "Bootstrap Go project (go mod init, create directory structure, add dependencies)",
-      "comments": []
+      "comments": [
+        "Completed: go.mod initialized with github.com/aws/ai-resource-core-go",
+        "Created directories: pkg/airesource, internal/schema, internal/template, internal/types",
+        "Added dependencies: gopkg.in/yaml.v3, github.com/xeipuuv/gojsonschema, github.com/cbroglie/mustache"
+      ]
     },
     {
       "id": "TASK-001",
