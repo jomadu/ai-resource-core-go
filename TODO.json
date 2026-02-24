@@ -15,10 +15,16 @@
     {
       "id": "TASK-001",
       "priority": 1,
-      "status": "TODO",
+      "status": "DONE",
       "dependencies": ["TASK-000"],
       "description": "Implement Core Types (core-types.md) - Resource envelope, Kind constants, Metadata, Prompt/Promptset/Rule/Ruleset types",
-      "comments": []
+      "comments": [
+        "Completed: Created pkg/airesource/{fragment,prompt,rule,resource}.go",
+        "Implemented all core types: Resource, Kind, Metadata, Prompt, Promptset, Rule, Ruleset, Fragment, Body",
+        "Added custom YAML unmarshaling for Body and BodyItem union types",
+        "Added type-safe accessors: AsPrompt, AsPromptset, AsRule, AsRuleset",
+        "Passes go build and go vet"
+      ]
     },
     {
       "id": "TASK-002",
