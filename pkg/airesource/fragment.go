@@ -79,21 +79,3 @@ type FragmentRef struct {
 	Fragment string                 `yaml:"fragment"`
 	Inputs   map[string]interface{} `yaml:"inputs,omitempty"`
 }
-
-// ValidationError represents a validation failure.
-type ValidationError struct {
-	Field   string
-	Message string
-	Cause   error
-}
-
-func (e *ValidationError) Error() string {
-	if e.Field != "" {
-		return "validation error at " + e.Field + ": " + e.Message
-	}
-	return "validation error: " + e.Message
-}
-
-func (e *ValidationError) Unwrap() error {
-	return e.Cause
-}

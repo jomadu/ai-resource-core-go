@@ -29,10 +29,18 @@
     {
       "id": "TASK-002",
       "priority": 1,
-      "status": "TODO",
+      "status": "DONE",
       "dependencies": ["TASK-001"],
       "description": "Implement Error Handling (error-handling.md) - ValidationError, SchemaError, FragmentError, MultiError types",
-      "comments": []
+      "comments": [
+        "Completed: Created pkg/airesource/errors.go",
+        "Implemented all error types: ValidationError, SchemaError, FragmentError, InputError, LoadError, MultiError",
+        "All types implement error interface with Error() methods",
+        "Implemented Unwrap() for error chaining (ValidationError, FragmentError, LoadError)",
+        "Implemented Unwrap() []error for MultiError (Go 1.20+)",
+        "Moved ValidationError from fragment.go to errors.go",
+        "Passes go build and go vet"
+      ]
     },
     {
       "id": "TASK-003",
