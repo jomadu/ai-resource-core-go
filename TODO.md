@@ -28,7 +28,7 @@
 
 ## TASK-005
 - Priority: 1
-- Status: TODO
+- Status: DONE
 - Dependencies: [TASK-004]
 - Description: Update `fragment-resolution.md` to reflect new Body type structure with String/Array fields instead of interface{}. See ISSUES.md Issue #3 for context.
 

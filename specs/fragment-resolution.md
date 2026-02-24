@@ -25,6 +25,19 @@ Transform resource bodies containing fragment references into final rendered str
 
 ## Data Structures
 
+### Body Type
+
+See `core-types.md` for complete Body type definition. Body uses an explicit union structure:
+
+```go
+type Body struct {
+    String *string
+    Array  []BodyItem
+}
+```
+
+Exactly one of `Body.String` or `Body.Array` must be non-nil.
+
 ### ResolveOptions
 ```go
 type ResolveOptions struct {
@@ -37,11 +50,11 @@ type ResolveOptions struct {
 
 ## Algorithm
 
-1. Check body type (string or array)
-2. If string: return as-is
-3. If array: process each item
-   - If item is string: add to parts
-   - If item is fragment reference:
+1. Check body type (Body.String or Body.Array)
+2. If Body.String is set: return string value as-is
+3. If Body.Array is set: process each BodyItem
+   - If BodyItem.String is set: add to parts
+   - If BodyItem.FragmentRef is set:
      - Lookup fragment
      - Render template with inputs
      - Add rendered result to parts
@@ -51,26 +64,26 @@ type ResolveOptions struct {
 **Pseudocode:**
 ```
 function ResolveBody(body, fragments):
-    if is_string(body):
-        return body
+    if body.String != nil:
+        return *body.String
     
-    if not is_array(body):
-        return error("body must be string or array")
+    if body.Array == nil:
+        return error("body must have String or Array set")
     
     parts = []
     
-    for item in body:
-        if is_string(item):
-            parts.append(item)
-        else if is_fragment_ref(item):
-            fragment = fragments[item.Fragment]
+    for item in body.Array:
+        if item.String != nil:
+            parts.append(*item.String)
+        else if item.FragmentRef != nil:
+            fragment = fragments[item.FragmentRef.Fragment]
             if not fragment:
-                return error("fragment not found: {item.Fragment}")
+                return error("fragment not found: {item.FragmentRef.Fragment}")
             
-            rendered = render_mustache(fragment.Body, item.Inputs)
+            rendered = render_mustache(fragment.Body, item.FragmentRef.Inputs)
             parts.append(rendered)
         else:
-            return error("invalid body item type")
+            return error("BodyItem must have String or FragmentRef set")
     
     return join(parts, "\n\n")
 ```
@@ -123,7 +136,9 @@ function render_mustache(template, inputs):
 
 **Input:**
 ```go
-body := "Simple text body"
+body := Body{
+    String: stringPtr("Simple text body"),
+}
 result, err := ResolveBody(body, fragments)
 ```
 
@@ -147,11 +162,15 @@ fragments := map[string]Fragment{
     },
 }
 
-body := []interface{}{
-    map[string]interface{}{
-        "fragment": "greet",
-        "inputs": map[string]interface{}{
-            "name": "World",
+body := Body{
+    Array: []BodyItem{
+        {
+            FragmentRef: &FragmentRef{
+                Fragment: "greet",
+                Inputs: map[string]interface{}{
+                    "name": "World",
+                },
+            },
         },
     },
 }
@@ -179,15 +198,19 @@ fragments := map[string]Fragment{
     },
 }
 
-body := []interface{}{
-    "Introduction text",
-    map[string]interface{}{
-        "fragment": "read",
-        "inputs": map[string]interface{}{
-            "path": "data.txt",
+body := Body{
+    Array: []BodyItem{
+        {String: stringPtr("Introduction text")},
+        {
+            FragmentRef: &FragmentRef{
+                Fragment: "read",
+                Inputs: map[string]interface{}{
+                    "path": "data.txt",
+                },
+            },
         },
+        {String: stringPtr("Conclusion text")},
     },
-    "Conclusion text",
 }
 
 result, err := ResolveBody(body, fragments)
@@ -213,11 +236,15 @@ fragments := map[string]Fragment{
     },
 }
 
-body := []interface{}{
-    map[string]interface{}{
-        "fragment": "conditional",
-        "inputs": map[string]interface{}{
-            "show": true,
+body := Body{
+    Array: []BodyItem{
+        {
+            FragmentRef: &FragmentRef{
+                Fragment: "conditional",
+                Inputs: map[string]interface{}{
+                    "show": true,
+                },
+            },
         },
     },
 }
@@ -245,11 +272,15 @@ fragments := map[string]Fragment{
     },
 }
 
-body := []interface{}{
-    map[string]interface{}{
-        "fragment": "list",
-        "inputs": map[string]interface{}{
-            "files": []string{"a.txt", "b.txt", "c.txt"},
+body := Body{
+    Array: []BodyItem{
+        {
+            FragmentRef: &FragmentRef{
+                Fragment: "list",
+                Inputs: map[string]interface{}{
+                    "files": []string{"a.txt", "b.txt", "c.txt"},
+                },
+            },
         },
     },
 }
@@ -271,10 +302,14 @@ err == nil
 
 **Input:**
 ```go
-body := []interface{}{
-    map[string]interface{}{
-        "fragment": "missing",
-        "inputs": map[string]interface{}{},
+body := Body{
+    Array: []BodyItem{
+        {
+            FragmentRef: &FragmentRef{
+                Fragment: "missing",
+                Inputs:   map[string]interface{}{},
+            },
+        },
     },
 }
 
