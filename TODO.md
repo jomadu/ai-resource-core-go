@@ -10,7 +10,7 @@
 
 ## TASK-002
 - Priority: 1
-- Status: TODO
+- Status: DONE
 - Dependencies: []
 - Description: Update `fragment-input-validation.md` to clarify it runs during semantic validation phase, not as separate step during resolution. See ISSUES.md Issue #2 for context and decision rationale.
 

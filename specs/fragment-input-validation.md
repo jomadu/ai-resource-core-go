@@ -326,7 +326,8 @@ err.Message contains "undefined input 'extra'"
 
 ## Notes
 
-- Input validation happens before fragment resolution
+- Input validation runs during the semantic validation phase, not during fragment resolution
+- Validation pipeline: Schema validation → Semantic validation (including fragment input validation) → Resolution
 - InputDefinition structure maps directly to JSON Schema subset
 - Leverages existing JSON Schema validation library for consistency
 - Type validation is strict - no automatic coercion
