@@ -16,7 +16,7 @@
 
 ## TASK-003
 - Priority: 1
-- Status: TODO
+- Status: DONE
 - Dependencies: []
 - Description: Update `error-handling.md` to document fail-fast validation pipeline: Schema errors → return, Semantic errors (including input validation) → return, Success. See ISSUES.md Issue #4 for context and decision rationale.
 

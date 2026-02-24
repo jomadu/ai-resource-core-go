@@ -128,6 +128,50 @@ func (e *MultiError) Unwrap() []error
 
 **Usage:** Aggregating multiple validation errors
 
+## Validation Pipeline
+
+Core uses a fail-fast validation pipeline with three phases:
+
+```
+Schema Validation → Semantic Validation → Success
+```
+
+**Phase 1: Schema Validation**
+- Validates YAML structure against JSON Schema
+- Returns SchemaError or LoadError on failure
+- If errors found, pipeline stops (no semantic validation)
+
+**Phase 2: Semantic Validation**
+- Validates business rules and constraints
+- Includes fragment input validation
+- Returns ValidationError, FragmentError, or InputError on failure
+- If errors found, pipeline stops (no resolution)
+
+**Phase 3: Success**
+- All validations passed
+- Resource is ready for use
+
+**Error Collection:**
+- Within each phase, collect all errors (return MultiError if multiple)
+- Between phases, fail fast (first phase with errors stops pipeline)
+- This prevents cascading errors while showing all issues within a validation phase
+
+**Example:**
+```go
+// Phase 1: Schema validation
+if schemaErrors := validateSchema(resource); schemaErrors != nil {
+    return schemaErrors // Stop here, don't run semantic validation
+}
+
+// Phase 2: Semantic validation (includes input validation)
+if semanticErrors := validateSemantic(resource); semanticErrors != nil {
+    return semanticErrors // Stop here, don't proceed to resolution
+}
+
+// Phase 3: Success
+return resource, nil
+```
+
 ## Algorithm
 
 ### Error Formatting
