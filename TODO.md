@@ -4,7 +4,7 @@
 
 ## TASK-001
 - Priority: 1
-- Status: TODO
+- Status: DONE
 - Dependencies: []
 - Description: Update `semantic-validation.md` to clarify that fragment input validation happens during semantic validation phase, not during resolution. See ISSUES.md Issue #2 for context and decision rationale.
 

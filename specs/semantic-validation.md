@@ -8,6 +8,7 @@ Enforce semantic rules and constraints that go beyond structural JSON Schema val
 - Validate collection keys match ID pattern
 - Validate collections have minimum 1 item
 - Validate fragment input names match definitions
+- Validate fragment input types and values (see `fragment-input-validation.md`)
 - Validate no circular dependencies (future-proofing)
 - Validate scope glob patterns are well-formed
 - Validate body format (string or array)
@@ -125,15 +126,11 @@ function validate_fragment_ref(ref, fragments, errors):
         errors.append("fragment '{ref.Fragment}' not found")
         return
     
-    // Check required inputs provided
-    for input_name, input_def in fragment.Inputs:
-        if input_def.Required and not ref.Inputs[input_name]:
-            errors.append("required input '{input_name}' not provided")
-    
-    // Check no undefined inputs
-    for input_name in ref.Inputs:
-        if not fragment.Inputs[input_name]:
-            errors.append("undefined input '{input_name}' for fragment '{ref.Fragment}'")
+    // Validate fragment inputs (types, required, defaults)
+    // See fragment-input-validation.md for full algorithm
+    input_errors = validate_fragment_inputs(ref.Fragment, fragment, ref.Inputs)
+    if input_errors:
+        errors.append(input_errors)
 ```
 
 ## Edge Cases
@@ -156,6 +153,7 @@ function validate_fragment_ref(ref, fragments, errors):
 
 - `core-types.md` - Resource types being validated
 - `schema-validation.md` - Must pass schema validation first
+- `fragment-input-validation.md` - Fragment input type validation (runs during semantic phase)
 - Glob pattern validation library
 
 ## Implementation Mapping
@@ -303,10 +301,10 @@ err.Message == "promptset must have at least one prompt"
 ## Notes
 
 - Semantic validation runs after schema validation passes
+- Fragment input validation (type checking) happens during semantic validation, not during resolution
 - Fragment references are validated but not resolved (resolution is separate)
 - Pattern validation for IDs uses regex: `^[a-zA-Z0-9_-]+$`
 - Collections (prompts, rules, fragments) must have at least one entry
-- Fragment input validation checks existence and required status, not types (types validated during resolution)
 - Glob pattern validation ensures patterns are syntactically valid, not that they match files
 - All errors should be collected and returned together, not fail-fast
 
