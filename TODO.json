@@ -15,10 +15,15 @@
     {
       "id": "TASK-002",
       "priority": 2,
-      "status": "TODO",
+      "status": "DONE",
       "dependencies": ["TASK-001"],
       "description": "Create Makefile with targets: test, test-conformance, build, lint, update-spec, help. Implement submodule auto-initialization in test targets",
-      "comments": []
+      "comments": [
+        "Created Makefile with all required targets",
+        "Implemented submodule auto-initialization in test and test-conformance targets",
+        "Added help target with descriptions",
+        "Verified Makefile works correctly"
+      ]
     },
     {
       "id": "TASK-003",
