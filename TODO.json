@@ -42,13 +42,14 @@
     {
       "id": "TASK-004",
       "priority": 3,
-      "status": "TODO",
+      "status": "DONE",
       "dependencies": ["TASK-001", "TASK-002"],
       "description": "LoadOptions Completeness - Add MaxArraySize (default: 10000), MaxNestingDepth (default: 100), Timeout (default: 30s) to pkg/airesource/options.go, add functional options, implement enforcement in loader.go, add tests for limit violations",
       "comments": [
         "Safety & robustness - missing safety limits for arrays, nesting depth, and timeouts",
         "Estimated effort: 2-3 hours",
-        "Spec: specs/resource-loading.md"
+        "Spec: specs/resource-loading.md",
+        "Completed: Added timeout enforcement with context.WithTimeout, added validateLimits() function to check MaxArraySize and MaxNestingDepth recursively, created loader_test.go with tests for all limit violations (file size, array size, nesting depth, timeout, multi-document). All tests pass."
       ]
     },
     {

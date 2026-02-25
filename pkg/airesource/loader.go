@@ -2,6 +2,7 @@ package airesource
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -19,6 +20,31 @@ func LoadResource(path string, opts ...LoadOption) (*Resource, error) {
 		opt(&options)
 	}
 
+	ctx, cancel := context.WithTimeout(context.Background(), options.Timeout)
+	defer cancel()
+
+	done := make(chan struct {
+		res *Resource
+		err error
+	}, 1)
+
+	go func() {
+		res, err := loadResourceSync(path, options)
+		done <- struct {
+			res *Resource
+			err error
+		}{res, err}
+	}()
+
+	select {
+	case result := <-done:
+		return result.res, result.err
+	case <-ctx.Done():
+		return nil, &LoadError{Path: path, Message: fmt.Sprintf("operation timed out after %v", options.Timeout)}
+	}
+}
+
+func loadResourceSync(path string, options LoadOptions) (*Resource, error) {
 	data, err := os.ReadFile(path)
 	if err != nil {
 		return nil, &LoadError{Path: path, Message: "file not found", Cause: err}
@@ -63,6 +89,10 @@ func LoadResource(path string, opts ...LoadOption) (*Resource, error) {
 		return nil, &LoadError{Path: path, Message: "missing required field: kind"}
 	}
 
+	if err := validateLimits(&resource, options); err != nil {
+		return nil, &LoadError{Path: path, Message: err.Error()}
+	}
+
 	if err := schema.ValidateSchema(&resource); err != nil {
 		return nil, err
 	}
@@ -80,6 +110,31 @@ func LoadResources(path string, opts ...LoadOption) ([]*Resource, error) {
 		opt(&options)
 	}
 
+	ctx, cancel := context.WithTimeout(context.Background(), options.Timeout)
+	defer cancel()
+
+	done := make(chan struct {
+		res []*Resource
+		err error
+	}, 1)
+
+	go func() {
+		res, err := loadResourcesSync(path, options)
+		done <- struct {
+			res []*Resource
+			err error
+		}{res, err}
+	}()
+
+	select {
+	case result := <-done:
+		return result.res, result.err
+	case <-ctx.Done():
+		return nil, &LoadError{Path: path, Message: fmt.Sprintf("operation timed out after %v", options.Timeout)}
+	}
+}
+
+func loadResourcesSync(path string, options LoadOptions) ([]*Resource, error) {
 	data, err := os.ReadFile(path)
 	if err != nil {
 		return nil, &LoadError{Path: path, Message: "file not found", Cause: err}
@@ -142,6 +197,13 @@ func LoadResources(path string, opts ...LoadOption) ([]*Resource, error) {
 			}
 		}
 
+		if err := validateLimits(&resource, options); err != nil {
+			return nil, &LoadError{
+				Path:    path,
+				Message: fmt.Sprintf("document %d: %s", len(resources)+1, err.Error()),
+			}
+		}
+
 		if err := schema.ValidateSchema(&resource); err != nil {
 			return nil, err
 		}
@@ -190,4 +252,45 @@ func LoadRuleset(path string, opts ...LoadOption) (*Ruleset, error) {
 		return nil, err
 	}
 	return resource.AsRuleset()
+}
+
+func validateLimits(resource *Resource, options LoadOptions) error {
+	depth := 0
+	maxDepth := 0
+
+	var checkValue func(interface{}, int) error
+	checkValue = func(v interface{}, currentDepth int) error {
+		if currentDepth > maxDepth {
+			maxDepth = currentDepth
+		}
+		if currentDepth > options.MaxNestingDepth {
+			return fmt.Errorf("nesting depth %d exceeds limit %d", currentDepth, options.MaxNestingDepth)
+		}
+
+		switch val := v.(type) {
+		case map[string]interface{}:
+			for _, item := range val {
+				if err := checkValue(item, currentDepth+1); err != nil {
+					return err
+				}
+			}
+		case []interface{}:
+			if len(val) > options.MaxArraySize {
+				return fmt.Errorf("array size %d exceeds limit %d", len(val), options.MaxArraySize)
+			}
+			for _, item := range val {
+				if err := checkValue(item, currentDepth+1); err != nil {
+					return err
+				}
+			}
+		}
+		return nil
+	}
+
+	data := map[string]interface{}{
+		"metadata": resource.Metadata,
+		"spec":     resource.Spec,
+	}
+
+	return checkValue(data, depth)
 }
