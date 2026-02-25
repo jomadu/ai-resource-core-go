@@ -41,10 +41,15 @@
     {
       "id": "TASK-004",
       "priority": 3,
-      "status": "TODO",
+      "status": "DONE",
       "dependencies": ["TASK-003"],
       "description": "Separate conformance tests (using official fixtures) from unit tests (using local fixtures for edge cases) and document distinction",
-      "comments": []
+      "comments": [
+        "Created testdata/README.md documenting test fixture organization",
+        "Added documentation comments to conformance_test.go explaining requirements",
+        "Added documentation comments to unit test files (loader_test.go, validator_test.go, fragment_test.go)",
+        "Clarified that conformance tests use official fixtures, unit tests use dynamic fixtures"
+      ]
     }
   ]
 }

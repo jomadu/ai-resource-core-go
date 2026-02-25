@@ -6,6 +6,15 @@ import (
 	"testing"
 )
 
+// Conformance tests verify that the Go implementation correctly interprets
+// AI Resources according to the official specification.
+//
+// These tests MUST use official fixtures from the ai-resource-spec repository
+// (via git submodule at testdata/spec/). They MUST NOT fall back to local
+// fixtures or skip tests silently.
+//
+// Run with: make test-conformance
+
 const (
 	specValidDir   = "../../testdata/spec/schema/draft/tests/valid"
 	specInvalidDir = "../../testdata/spec/schema/draft/tests/invalid"

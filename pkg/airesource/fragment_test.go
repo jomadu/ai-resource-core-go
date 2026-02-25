@@ -2,6 +2,12 @@ package airesource
 
 import "testing"
 
+// Unit tests for fragment resolution and input validation.
+// These tests use dynamically generated fragments to test Mustache rendering
+// and input validation rules.
+//
+// Unlike conformance tests, these do NOT use official spec fixtures.
+
 func TestValidateInputs_ValidString(t *testing.T) {
 	fragment := Fragment{
 		Inputs: map[string]InputDefinition{

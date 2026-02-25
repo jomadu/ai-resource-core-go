@@ -5,6 +5,11 @@ import (
 	"testing"
 )
 
+// Unit tests for semantic validation functionality.
+// These tests use dynamically generated resources to test validation rules.
+//
+// Unlike conformance tests, these do NOT use official spec fixtures.
+
 func TestValidateSemantic_ValidPrompt(t *testing.T) {
 	resource := &Resource{
 		APIVersion: "ai-resource/draft",

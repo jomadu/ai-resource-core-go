@@ -8,6 +8,12 @@ import (
 	"time"
 )
 
+// Unit tests for resource loading functionality.
+// These tests use dynamically generated fixtures to test implementation-specific
+// behavior, edge cases, and error handling.
+//
+// Unlike conformance tests, these do NOT use official spec fixtures.
+
 func TestMaxFileSizeLimit(t *testing.T) {
 	tmpDir := t.TempDir()
 	path := filepath.Join(tmpDir, "large.yml")
