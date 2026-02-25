@@ -25,11 +25,12 @@
     {
       "id": "TASK-003",
       "priority": 2,
-      "status": "TODO",
+      "status": "DONE",
       "dependencies": [],
       "description": "Update AGENTS.md - Update Quick Reference section with Makefile commands, update Operational Learnings section to document submodule as REQUIRED with troubleshooting guidance",
       "comments": [
-        "See TASK.md and PLAN.md for detailed requirements and rationale. These documents are temporary and will be deleted after tasks complete."
+        "See TASK.md and PLAN.md for detailed requirements and rationale. These documents are temporary and will be deleted after tasks complete.",
+        "Completed 2026-02-25: Updated Quick Reference with Makefile commands (make help, test, test-conformance, build, lint, update-spec), updated Operational Learnings to document submodule as REQUIRED with troubleshooting guidance, updated verification date."
       ]
     },
     {

@@ -36,8 +36,12 @@ Manual editing. Tasks auto-increment. Keep all tasks (including DONE) in file.
 - `jq '.tasks[] | select(.id == "TASK-XXX")' TODO.json` - Show single task
 - `jq '.tasks[] | select(.status != "DONE")' TODO.json` - List incomplete tasks
 - `jq '.tasks[] | select(.status == "TODO" and (.dependencies | length == 0 or all(. as $dep | any($dep == .tasks[].id and .tasks[].status == "DONE"))))' TODO.json` - List ready tasks
-- `go test ./...` - Run tests (when initialized)
-- `go build ./...` - Build packages (when initialized)
+- `make help` - Show all available commands
+- `make test` - Run all tests (auto-initializes submodule)
+- `make test-conformance` - Run conformance tests only
+- `make build` - Build all packages
+- `make lint` - Run linters
+- `make update-spec` - Update spec to latest version
 
 ## Planning System
 
@@ -93,11 +97,13 @@ Audit results written to `AUDIT.md` at repository root.
 
 ## Operational Learnings
 
-Last verified: 2026-02-20
+Last verified: 2026-02-25
 
 **Working:**
 - Specification structure in `specs/` directory
 - TASK.md defines implementation plan
+- Makefile is the standard interface for all development tasks
+- Conformance test submodule is REQUIRED (not optional)
 
 **Not working:**
 - Go module not initialized (no go.mod)
@@ -107,3 +113,8 @@ Last verified: 2026-02-20
 **Rationale:**
 - Project in bootstrap phase
 - Specifications complete, implementation pending
+
+**Troubleshooting:**
+- If tests fail with submodule error, run `make test` (auto-initializes submodule)
+- Submodule must be initialized before running conformance tests
+- Use `make update-spec` to update spec to latest version
