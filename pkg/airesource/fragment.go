@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"strings"
 
-	"github.com/cbroglie/mustache"
+	"github.com/aws/ai-resource-core-go/internal/template"
 )
 
 // Fragment represents a reusable template with typed inputs.
@@ -366,7 +366,7 @@ func ResolveBody(body Body, fragments map[string]Fragment) (string, error) {
 				}
 			}
 
-			rendered, err := mustache.Render(fragment.Body, item.FragmentRef.Inputs)
+			rendered, err := template.Render(fragment.Body, item.FragmentRef.Inputs)
 			if err != nil {
 				return "", &FragmentError{
 					FragmentID: item.FragmentRef.Fragment,

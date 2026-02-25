@@ -1,156 +1,77 @@
 {
   "tasks": [
     {
-      "id": "TASK-000",
-      "priority": 1,
-      "status": "DONE",
-      "dependencies": [],
-      "description": "Bootstrap Go project (go mod init, create directory structure, add dependencies)",
-      "comments": [
-        "Completed: go.mod initialized with github.com/aws/ai-resource-core-go",
-        "Created directories: pkg/airesource, internal/schema, internal/template, internal/types",
-        "Added dependencies: gopkg.in/yaml.v3, github.com/xeipuuv/gojsonschema, github.com/cbroglie/mustache"
-      ]
-    },
-    {
       "id": "TASK-001",
       "priority": 1,
       "status": "DONE",
-      "dependencies": ["TASK-000"],
-      "description": "Implement Core Types (core-types.md) - Resource envelope, Kind constants, Metadata, Prompt/Promptset/Rule/Ruleset types",
+      "dependencies": [],
+      "description": "Mustache Template Rendering - Add Mustache dependency, create internal/template/renderer.go, update ResolveBody() in pkg/airesource/fragment.go, add tests for variable substitution, conditionals, array iteration, missing variables, and template syntax errors",
       "comments": [
-        "Completed: Created pkg/airesource/{fragment,prompt,rule,resource}.go",
-        "Implemented all core types: Resource, Kind, Metadata, Prompt, Promptset, Rule, Ruleset, Fragment, Body",
-        "Added custom YAML unmarshaling for Body and BodyItem union types",
-        "Added type-safe accessors: AsPrompt, AsPromptset, AsRule, AsRuleset",
-        "Passes go build and go vet"
+        "Blocks core functionality - fragment resolution cannot render templates",
+        "Estimated effort: 2-3 hours",
+        "Spec: specs/fragment-resolution.md",
+        "Completed: Mustache already integrated, added comprehensive tests (missing variables, conditional false, empty array iteration, object iteration, single item array, template syntax errors), created internal/template/renderer.go, refactored fragment.go to use internal package. All tests pass."
       ]
     },
     {
       "id": "TASK-002",
-      "priority": 1,
-      "status": "DONE",
+      "priority": 2,
+      "status": "TODO",
       "dependencies": ["TASK-001"],
-      "description": "Implement Error Handling (error-handling.md) - ValidationError, SchemaError, FragmentError, MultiError types",
+      "description": "Fragment Input Validation via JSON Schema - Refactor ValidateInputs() to use BuildSchemaFromInputs() and internal/schema/validator.go, remove manual validateType() function, update error handling to convert JSON Schema errors to InputError format, update tests",
       "comments": [
-        "Completed: Created pkg/airesource/errors.go",
-        "Implemented all error types: ValidationError, SchemaError, FragmentError, InputError, LoadError, MultiError",
-        "All types implement error interface with Error() methods",
-        "Implemented Unwrap() for error chaining (ValidationError, FragmentError, LoadError)",
-        "Implemented Unwrap() []error for MultiError (Go 1.20+)",
-        "Moved ValidationError from fragment.go to errors.go",
-        "Passes go build and go vet"
+        "Spec compliance - implementation uses manual type checking instead of JSON Schema",
+        "Estimated effort: 2-3 hours",
+        "Spec: specs/fragment-input-validation.md"
       ]
     },
     {
       "id": "TASK-003",
-      "priority": 1,
-      "status": "DONE",
+      "priority": 2,
+      "status": "TODO",
       "dependencies": ["TASK-001", "TASK-002"],
-      "description": "Implement Resource Loading (resource-loading.md) - YAML/JSON parsing, multi-document support, LoadResource/LoadResources functions",
+      "description": "Conformance Test Suite Structure - Add git submodule for spec repository (if exists), update conformance_test.go to discover fixtures from testdata/spec/examples/, run valid/invalid examples, generate conformance report, document in README.md",
       "comments": [
-        "Completed: Created pkg/airesource/{options,version,loader}.go",
-        "Implemented LoadResource, LoadResources, LoadPrompt, LoadPromptset, LoadRule, LoadRuleset",
-        "Added LoadOptions with functional options pattern (WithMaxFileSize, etc.)",
-        "Supports YAML and JSON parsing, multi-document YAML files",
-        "Version validation with clear error messages",
-        "File size limits and safety checks",
-        "Added JSON unmarshaling to Body and BodyItem types for remarshal support",
-        "All tests pass: go test ./...",
-        "Passes go build and go vet"
+        "Spec compliance - no official test fixtures from spec repository",
+        "Estimated effort: 1-2 hours",
+        "Spec: specs/conformance-testing.md",
+        "Note: If spec repository doesn't exist yet, defer and document in AUDIT.md"
       ]
     },
     {
       "id": "TASK-004",
-      "priority": 2,
-      "status": "DONE",
+      "priority": 3,
+      "status": "TODO",
       "dependencies": ["TASK-001", "TASK-002"],
-      "description": "Implement Schema Validation (schema-validation.md) - Embedded JSON schemas, validator integration, pattern/enum validation",
+      "description": "LoadOptions Completeness - Add MaxArraySize (default: 10000), MaxNestingDepth (default: 100), Timeout (default: 30s) to pkg/airesource/options.go, add functional options, implement enforcement in loader.go, add tests for limit violations",
       "comments": [
-        "Completed: Created internal/schema/{schemas.go,validator.go,validator_test.go}",
-        "Embedded JSON schemas for Prompt, Promptset, Rule, Ruleset",
-        "Implemented ValidateSchema function with gojsonschema integration",
-        "Returns SchemaError with field paths for validation failures",
-        "Returns MultiError for multiple validation errors",
-        "Integrated schema validation into LoadResource and LoadResources",
-        "Added JSON tags to Resource and Metadata structs for proper marshaling",
-        "All tests pass: go test ./...",
-        "Passes go build and go vet"
+        "Safety & robustness - missing safety limits for arrays, nesting depth, and timeouts",
+        "Estimated effort: 2-3 hours",
+        "Spec: specs/resource-loading.md"
       ]
     },
     {
       "id": "TASK-005",
-      "priority": 2,
-      "status": "DONE",
-      "dependencies": ["TASK-001", "TASK-002", "TASK-004"],
-      "description": "Implement Fragment Input Validation (fragment-input-validation.md) - InputDefinition to JSON Schema conversion, type validation",
+      "priority": 4,
+      "status": "TODO",
+      "dependencies": ["TASK-001", "TASK-002", "TASK-003", "TASK-004"],
+      "description": "internal/types/ Implementation - Create internal/types/validation.go, move type-specific validation helpers from pkg/airesource/validator.go, update imports, run tests to verify no regressions",
       "comments": [
-        "Completed: Added ValidateInputs function to pkg/airesource/fragment.go",
-        "Implemented BuildSchemaFromInputs for InputDefinition to JSON Schema conversion",
-        "Validates string, number, boolean, array, and object types",
-        "Applies default values for missing optional inputs",
-        "Checks for required inputs and undefined inputs",
-        "Returns InputError with expected vs actual types for mismatches",
-        "Recursively validates nested arrays and objects",
-        "All tests pass: go test ./...",
-        "Passes go build and go vet"
+        "Code organization - empty directory, validation logic in public API",
+        "Estimated effort: 1 hour",
+        "Low priority - current implementation works, purely organizational"
       ]
     },
     {
       "id": "TASK-006",
-      "priority": 2,
-      "status": "DONE",
-      "dependencies": ["TASK-001", "TASK-004", "TASK-005"],
-      "description": "Implement Semantic Validation (semantic-validation.md) - Fragment reference checking, collection validation, scope validation",
-      "comments": [
-        "Completed: Created pkg/airesource/{validator.go,validator_test.go}",
-        "Implemented ValidateSemantic function with pattern validation for IDs and collection keys",
-        "Validates fragment references exist and inputs are valid",
-        "Validates collections (prompts, rules) have minimum 1 item",
-        "Validates metadata.id and fragment/collection keys match ^[a-zA-Z0-9_-]+$",
-        "Validates body structure (string or array with valid items)",
-        "Integrated into LoadResource and LoadResources after schema validation",
-        "Added MarshalJSON methods to Body and BodyItem for remarshal support",
-        "Added JSON tags to all spec types for proper marshaling",
-        "All tests pass: go test ./...",
-        "Passes go build and go vet"
-      ]
-    },
-    {
-      "id": "TASK-007",
-      "priority": 3,
-      "status": "DONE",
-      "dependencies": ["TASK-001", "TASK-005"],
-      "description": "Implement Fragment Resolution (fragment-resolution.md) - Body type detection, Mustache rendering, ResolveBody function",
-      "comments": [
-        "Completed: Added ResolveBody function to pkg/airesource/fragment.go",
-        "Implemented body type detection (String vs Array)",
-        "Integrated mustache library for template rendering",
-        "Fragment reference lookup with clear error messages",
-        "Parts joined with double newline separator",
-        "Added comprehensive tests covering all spec examples",
-        "All tests pass: go test ./...",
-        "Passes go build and go vet"
-      ]
-    },
-    {
-      "id": "TASK-008",
       "priority": 4,
-      "status": "DONE",
-      "dependencies": ["TASK-001", "TASK-002", "TASK-003", "TASK-004", "TASK-005", "TASK-006", "TASK-007"],
-      "description": "Implement Conformance Testing (conformance-testing.md) - Test fixture discovery, valid/invalid case testing, CI/CD integration",
+      "status": "TODO",
+      "dependencies": ["TASK-001"],
+      "description": "internal/template/ Implementation - Create internal/template/renderer.go as part of Mustache integration (covered by TASK-001)",
       "comments": [
-        "Completed: Created pkg/airesource/conformance_test.go",
-        "Created testdata/valid/ with 6 test fixtures (prompt, promptset, rule, ruleset, fragment, multi-doc)",
-        "Created testdata/invalid/ with 5 test fixtures (invalid-version, missing-id, invalid-id, missing-body, undefined-fragment)",
-        "Implemented TestConformance with valid and invalid case testing",
-        "Implemented TestFragmentResolution to verify fragment rendering",
-        "Implemented TestAllResourceKinds to verify all resource types",
-        "Implemented TestMultiDocumentLoading to verify multi-doc YAML",
-        "Implemented TestConformanceDiscovery to verify fixture discovery",
-        "Implemented TestConformanceReport for summary reporting",
-        "All tests pass: go test ./...",
-        "Passes go build and go vet"
+        "Code organization - empty directory, template logic needed",
+        "Estimated effort: Included in TASK-001",
+        "Covered by TASK-001 acceptance criteria"
       ]
     }
   ]

@@ -404,3 +404,179 @@ func TestResolveBody_EmptyString(t *testing.T) {
 		t.Errorf("expected empty string, got %s", result)
 	}
 }
+
+func TestResolveBody_MissingVariable(t *testing.T) {
+	fragments := map[string]Fragment{
+		"greet": {
+			Body: "Hello, {{name}}!",
+		},
+	}
+
+	body := Body{
+		Array: []BodyItem{
+			{
+				FragmentRef: &FragmentRef{
+					Fragment: "greet",
+					Inputs:   map[string]interface{}{},
+				},
+			},
+		},
+	}
+
+	result, err := ResolveBody(body, fragments)
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+
+	if result != "Hello, !" {
+		t.Errorf("expected 'Hello, !', got %s", result)
+	}
+}
+
+func TestResolveBody_ConditionalFalse(t *testing.T) {
+	fragments := map[string]Fragment{
+		"conditional": {
+			Body: "{{#show}}Visible{{/show}}{{^show}}Hidden{{/show}}",
+		},
+	}
+
+	body := Body{
+		Array: []BodyItem{
+			{
+				FragmentRef: &FragmentRef{
+					Fragment: "conditional",
+					Inputs: map[string]interface{}{
+						"show": false,
+					},
+				},
+			},
+		},
+	}
+
+	result, err := ResolveBody(body, fragments)
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+
+	if result != "Hidden" {
+		t.Errorf("expected 'Hidden', got %s", result)
+	}
+}
+
+func TestResolveBody_EmptyArrayIteration(t *testing.T) {
+	fragments := map[string]Fragment{
+		"list": {
+			Body: "Files:{{#files}} {{.}}{{/files}}",
+		},
+	}
+
+	body := Body{
+		Array: []BodyItem{
+			{
+				FragmentRef: &FragmentRef{
+					Fragment: "list",
+					Inputs: map[string]interface{}{
+						"files": []string{},
+					},
+				},
+			},
+		},
+	}
+
+	result, err := ResolveBody(body, fragments)
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+
+	if result != "Files:" {
+		t.Errorf("expected 'Files:', got %s", result)
+	}
+}
+
+func TestResolveBody_ArrayIterationObjects(t *testing.T) {
+	fragments := map[string]Fragment{
+		"users": {
+			Body: "{{#users}}Name: {{name}}, Age: {{age}}\n{{/users}}",
+		},
+	}
+
+	body := Body{
+		Array: []BodyItem{
+			{
+				FragmentRef: &FragmentRef{
+					Fragment: "users",
+					Inputs: map[string]interface{}{
+						"users": []map[string]interface{}{
+							{"name": "Alice", "age": 30},
+							{"name": "Bob", "age": 25},
+						},
+					},
+				},
+			},
+		},
+	}
+
+	result, err := ResolveBody(body, fragments)
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+
+	expected := "Name: Alice, Age: 30\nName: Bob, Age: 25\n"
+	if result != expected {
+		t.Errorf("expected %q, got %q", expected, result)
+	}
+}
+
+func TestResolveBody_SingleItemArray(t *testing.T) {
+	body := Body{
+		Array: []BodyItem{
+			{String: stringPtr("Single item")},
+		},
+	}
+
+	result, err := ResolveBody(body, nil)
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+
+	if result != "Single item" {
+		t.Errorf("expected 'Single item', got %s", result)
+	}
+}
+
+func TestResolveBody_TemplateSyntaxError(t *testing.T) {
+	fragments := map[string]Fragment{
+		"bad": {
+			Body: "{{#unclosed}",
+		},
+	}
+
+	body := Body{
+		Array: []BodyItem{
+			{
+				FragmentRef: &FragmentRef{
+					Fragment: "bad",
+					Inputs:   map[string]interface{}{},
+				},
+			},
+		},
+	}
+
+	_, err := ResolveBody(body, fragments)
+	if err == nil {
+		t.Fatal("expected error, got nil")
+	}
+
+	fragErr, ok := err.(*FragmentError)
+	if !ok {
+		t.Fatalf("expected FragmentError, got %T", err)
+	}
+
+	if fragErr.FragmentID != "bad" {
+		t.Errorf("expected FragmentID='bad', got %s", fragErr.FragmentID)
+	}
+
+	if fragErr.Message != "template rendering failed" {
+		t.Errorf("expected Message='template rendering failed', got %s", fragErr.Message)
+	}
+}

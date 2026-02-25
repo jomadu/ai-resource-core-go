@@ -1,206 +1,257 @@
-# Audit Report: Spec to Implementation Gap
+# Implementation Plan: Spec Drift Correction
 
 **Date:** 2026-02-24  
-**Iteration:** 1 of 5  
-**Status:** Published to TODO.md (2026-02-24T13:05:25-08:00)
+**Status:** Published to TODO.json (2026-02-24T17:00:02-08:00)  
+**Audit Reference:** AUDIT.md (2026-02-24)
 
-## Summary
+## Overview
 
-The ai-resource-core-go project has **complete specifications** but **zero implementation**. All 8 core specifications are unimplemented. The project is in bootstrap phase with no Go module initialized.
+This plan addresses 6 gaps identified between specification and implementation. Gaps are prioritized by user impact and system stability.
 
-## Spec-to-Implementation Gaps
+## Priority 1: Critical (Blocks Core Functionality)
 
-### 1. Core Types (core-types.md) - CRITICAL
-**Status:** Not implemented  
-**Impact:** Blocks all other work
+### Gap 1: Mustache Template Rendering
 
-**Missing:**
-- Resource envelope structure (APIVersion, Kind, Metadata, Spec)
-- Kind constants (Prompt, Promptset, Rule, Ruleset)
-- Metadata type with ID constraints
-- Prompt/Promptset/Rule/Ruleset types
-- Fragment and InputDefinition types
-- Body union type (String/Array with BodyItem)
-- Type-safe accessors (AsPrompt, AsRule, etc.)
+**Problem:** Fragment resolution cannot render templates with variables, conditionals, or iteration.
 
-**Dependencies:** None (foundational)
+**Spec:** `specs/fragment-resolution.md`
 
-### 2. Resource Loading (resource-loading.md) - CRITICAL
-**Status:** Not implemented  
-**Impact:** Entry point for library usage
+**Tasks:**
+1. Add Mustache dependency: `go get github.com/cbroglie/mustache`
+2. Create `internal/template/renderer.go`:
+   - `Render(template string, context map[string]interface{}) (string, error)`
+   - Wrap mustache library with error context
+3. Update `ResolveBody()` in `pkg/airesource/fragment.go`:
+   - Replace placeholder with actual Mustache rendering
+   - Pass fragment inputs as context
+   - Wrap template errors with fragment ID
+4. Add tests in `pkg/airesource/fragment_test.go`:
+   - Variable substitution: `{{name}}`
+   - Conditionals: `{{#show}}...{{/show}}`
+   - Array iteration: `{{#items}}...{{/items}}`
+   - Missing variables (should render empty)
+   - Template syntax errors
 
-**Missing:**
-- YAML/JSON file parsing
-- Multi-document YAML support (--- separator)
-- File size limit enforcement (default 10MB)
-- API version validation
-- LoadOptions with functional options pattern
-- LoadResource() and LoadResources() functions
+**Acceptance:**
+- All fragment resolution tests pass
+- `go test ./...` passes
+- Examples from `specs/fragment-resolution.md` work
 
-**Dependencies:** core-types.md
+**Estimated Effort:** 2-3 hours
 
-### 3. Error Handling (error-handling.md) - HIGH
-**Status:** Not implemented  
-**Impact:** Required by all validation components
+---
 
-**Missing:**
-- ValidationError type
-- SchemaError type
-- FragmentError type
-- InputError type
-- LoadError type
-- MultiError type with Unwrap support
-- Fail-fast validation pipeline (Schema → Semantic → Success)
+## Priority 2: High (Spec Compliance)
 
-**Dependencies:** core-types.md
+### Gap 2: Fragment Input Validation via JSON Schema
 
-### 4. Schema Validation (schema-validation.md) - HIGH
-**Status:** Not implemented  
-**Impact:** Structural correctness enforcement
+**Problem:** Implementation uses manual type checking instead of JSON Schema validation as specified.
 
-**Missing:**
-- Embedded JSON schemas for each resource kind
-- Schema selection by kind
-- JSON Schema validator integration
-- SchemaError generation with field paths
-- Pattern validation (metadata.id)
-- Enum validation (enforcement levels)
+**Spec:** `specs/fragment-input-validation.md`
 
-**Dependencies:** core-types.md, error-handling.md
+**Tasks:**
+1. Refactor `ValidateInputs()` in `pkg/airesource/fragment.go`:
+   - Use `BuildSchemaFromInputs()` to generate schema
+   - Call `internal/schema/validator.go` for validation
+   - Remove manual `validateType()` function
+   - Keep `applyDefaults()` before validation
+2. Update error handling:
+   - Convert JSON Schema errors to InputError format
+   - Preserve error messages for undefined inputs
+3. Update tests in `pkg/airesource/fragment_test.go`:
+   - Verify JSON Schema validation behavior
+   - Test nested structures (arrays, objects)
+   - Test additionalProperties: false enforcement
 
-### 5. Semantic Validation (semantic-validation.md) - HIGH
-**Status:** Not implemented  
-**Impact:** Business rule enforcement
+**Acceptance:**
+- Validation uses JSON Schema library
+- All existing tests pass
+- Error messages match spec requirements
+- No manual type checking code remains
 
-**Missing:**
-- Fragment reference existence checking
-- Collection key pattern validation
-- Minimum collection size validation (Promptset/Ruleset)
-- Body structure validation (string or array)
-- Scope glob pattern validation
-- Integration with fragment input validation
+**Estimated Effort:** 2-3 hours
 
-**Dependencies:** core-types.md, schema-validation.md, fragment-input-validation.md, error-handling.md
+---
 
-### 6. Fragment Input Validation (fragment-input-validation.md) - MEDIUM
-**Status:** Not implemented  
-**Impact:** Type safety for fragment inputs
+### Gap 3: Conformance Test Suite Structure
 
-**Missing:**
-- InputDefinition to JSON Schema conversion
-- Type validation (string, number, boolean, array, object)
-- Required input checking
-- Default value application
-- Recursive validation for arrays and objects
-- Undefined input detection
+**Problem:** No official test fixtures from spec repository.
 
-**Dependencies:** core-types.md, schema-validation.md (reuses library), error-handling.md
+**Spec:** `specs/conformance-testing.md`
 
-### 7. Fragment Resolution (fragment-resolution.md) - MEDIUM
-**Status:** Not implemented  
-**Impact:** Actual resource rendering
-
-**Missing:**
-- Body type detection (String vs Array)
-- Fragment reference lookup
-- Mustache template rendering
-- Part joining with "\n\n" separator
-- ResolveBody() function
-- Mustache library integration
-
-**Dependencies:** core-types.md, fragment-input-validation.md, error-handling.md
-
-### 8. Conformance Testing (conformance-testing.md) - LOW
-**Status:** Not implemented  
-**Impact:** Quality assurance
-
-**Missing:**
-- Test fixture discovery
-- Valid/invalid case testing
-- Git submodule setup for ai-resource-spec test fixtures
-- ConformanceResult reporting
-- CI/CD integration
-
-**Dependencies:** All other specs
-
-## Implementation-to-Spec Gaps
-
-**None.** No implementation exists to diverge from specifications.
-
-## Bootstrap Requirements
-
-Before implementation can begin:
-
-1. **Initialize Go module**
+**Tasks:**
+1. Add git submodule (if spec repo exists):
    ```bash
-   go mod init github.com/org/ai-resource-core-go
-   ```
-
-2. **Create directory structure**
-   ```bash
-   mkdir -p pkg/airesource
-   mkdir -p internal/schema
-   mkdir -p internal/template
-   mkdir -p internal/types
-   ```
-
-3. **Add dependencies**
-   - gopkg.in/yaml.v3 (YAML parsing)
-   - encoding/json (JSON parsing)
-   - github.com/xeipuuv/gojsonschema (schema validation)
-   - github.com/cbroglie/mustache (template rendering)
-
-4. **Set up test fixtures**
-   ```bash
-   git submodule add <ai-resource-spec-repo> testdata/spec
+   git submodule add <spec-repo-url> testdata/spec
    git submodule update --init --recursive
    ```
+2. Update `conformance_test.go`:
+   - Discover fixtures from `testdata/spec/examples/`
+   - Run valid examples (expect pass)
+   - Run invalid examples (expect fail)
+   - Generate conformance report
+3. Document in README.md:
+   - How to initialize submodules
+   - How to update test fixtures
+   - How to run conformance tests
 
-## Recommended Implementation Order
+**Acceptance:**
+- Submodule added and initialized
+- Tests discover and run fixtures automatically
+- Conformance report generated
+- CI/CD documentation updated
 
-1. **Phase 1: Foundation**
-   - Core Types (core-types.md)
-   - Error Handling (error-handling.md)
+**Estimated Effort:** 1-2 hours
 
-2. **Phase 2: Loading**
-   - Resource Loading (resource-loading.md)
+**Note:** If spec repository doesn't exist yet, defer this task and document in AUDIT.md.
 
-3. **Phase 3: Validation**
-   - Schema Validation (schema-validation.md)
-   - Fragment Input Validation (fragment-input-validation.md)
-   - Semantic Validation (semantic-validation.md)
+---
 
-4. **Phase 4: Resolution**
-   - Fragment Resolution (fragment-resolution.md)
+## Priority 3: Medium (Safety & Robustness)
 
-5. **Phase 5: Quality**
-   - Conformance Testing (conformance-testing.md)
+### Gap 4: LoadOptions Completeness
 
-## Quality Assessment
+**Problem:** Missing safety limits for arrays, nesting depth, and timeouts.
 
-**Specifications:**
-- ✅ All requirements testable
-- ✅ Examples provided
-- ✅ Implementation notes clear
-- ✅ Cross-references documented
-- ✅ Edge cases enumerated
+**Spec:** `specs/resource-loading.md`
 
-**Implementation:**
-- ❌ No code exists
-- ❌ No tests exist
-- ❌ No module initialized
+**Tasks:**
+1. Audit `pkg/airesource/options.go`:
+   - Verify `MaxFileSize` exists
+   - Add `MaxArraySize` (default: 10000)
+   - Add `MaxNestingDepth` (default: 100)
+   - Add `Timeout` (default: 30s)
+2. Add functional options:
+   - `WithMaxArraySize(size int)`
+   - `WithMaxNestingDepth(depth int)`
+   - `WithTimeout(timeout time.Duration)`
+3. Implement enforcement in `pkg/airesource/loader.go`:
+   - Check array sizes during parsing
+   - Check nesting depth during parsing
+   - Apply timeout to file operations
+4. Add tests in `pkg/airesource/loader_test.go`:
+   - Test array size limit violation
+   - Test nesting depth limit violation
+   - Test timeout behavior
 
-## Next Actions
+**Acceptance:**
+- All LoadOptions fields present
+- Limits enforced during loading
+- Tests verify limit violations fail gracefully
+- `go test ./...` passes
 
-1. Initialize Go module
-2. Create directory structure
-3. Implement core types
-4. Implement error handling
-5. Begin resource loading implementation
+**Estimated Effort:** 2-3 hours
+
+---
+
+## Priority 4: Low (Code Organization)
+
+### Gap 5: internal/types/ Implementation
+
+**Problem:** Empty directory, validation logic in public API.
+
+**Spec:** `AGENTS.md` - "internal/types/*.go - Type validation"
+
+**Tasks:**
+1. Create `internal/types/validation.go`:
+   - Move type-specific validation helpers from `pkg/airesource/validator.go`
+   - Keep public API minimal
+2. Update imports in `pkg/airesource/validator.go`
+3. Run tests to verify no regressions
+
+**Acceptance:**
+- Type validation helpers in `internal/types/`
+- Public API remains minimal
+- All tests pass
+
+**Estimated Effort:** 1 hour
+
+**Note:** Low priority - current implementation works, this is purely organizational.
+
+---
+
+### Gap 6: internal/template/ Implementation
+
+**Problem:** Empty directory, template logic needed for Gap 1.
+
+**Spec:** `AGENTS.md` - "internal/template/*.go - Mustache rendering"
+
+**Tasks:**
+- Addressed by Gap 1 implementation
+- Create `internal/template/renderer.go` as part of Mustache integration
+
+**Acceptance:**
+- Covered by Gap 1 acceptance criteria
+
+**Estimated Effort:** Included in Gap 1
+
+---
+
+## Execution Order
+
+1. **Gap 1** (P1) - Mustache rendering - IMMEDIATE
+2. **Gap 2** (P2) - JSON Schema validation - After Gap 1
+3. **Gap 3** (P2) - Conformance tests - After Gap 1 & 2
+4. **Gap 4** (P3) - LoadOptions - After Gap 1 & 2
+5. **Gap 5** (P4) - Code organization - After all functional gaps
+
+**Rationale:**
+- Gap 1 blocks core functionality - must be first
+- Gap 2 affects Gap 1 testing - should be second
+- Gap 3 validates Gaps 1 & 2 - should be third
+- Gap 4 is independent safety feature - can be parallel or after
+- Gap 5 is pure refactoring - last to avoid churn
+
+---
+
+## Validation Checkpoints
+
+After each gap is addressed:
+
+1. Run `go test ./...` - All tests must pass
+2. Run `go vet ./...` - No warnings
+3. Run `go build ./...` - Clean build
+4. Update AUDIT.md - Mark gap as resolved
+5. Commit with reference to gap number
+
+---
+
+## Success Criteria
+
+**Complete when:**
+- [ ] All P1 gaps resolved
+- [ ] All P2 gaps resolved
+- [ ] All tests pass
+- [ ] No spec/implementation divergence
+- [ ] AUDIT.md updated with resolution status
+
+**Partial success:**
+- P1 + P2 resolved = Core functionality complete
+- P3 resolved = Production-ready
+- P4 resolved = Fully organized codebase
+
+---
+
+## Risk Mitigation
+
+**Risk:** Mustache library doesn't match spec behavior  
+**Mitigation:** Test against spec examples first, adjust if needed
+
+**Risk:** JSON Schema validation changes error messages  
+**Mitigation:** Update tests to match new error format
+
+**Risk:** Spec repository doesn't exist yet  
+**Mitigation:** Document in AUDIT.md, create local fixtures as interim
+
+**Risk:** Breaking changes to public API  
+**Mitigation:** Keep API changes minimal, add deprecation warnings if needed
+
+---
 
 ## Notes
 
-- Specifications are complete and well-structured
-- No spec-to-spec conflicts detected
-- Clear dependency graph enables incremental implementation
-- Bootstrap phase is expected per AGENTS.md operational learnings
+- This plan is based on AUDIT.md dated 2026-02-24
+- Estimated efforts are for a single developer
+- Tasks can be parallelized where noted
+- Update this plan if new gaps are discovered
+- Archive this plan when all gaps resolved
