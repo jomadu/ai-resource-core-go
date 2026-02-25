@@ -49,3 +49,25 @@ If `LoadFile` succeeds, the resource is spec-compliant and normalized.
 - Clear separation from lifecycle and execution concerns
 
 Core enforces the contract. Other systems build on top of it.
+
+## Testing
+
+### Conformance Testing
+
+The project includes a conformance test suite to verify correct interpretation of AI Resources according to the specification.
+
+**Current Status:** Uses local test fixtures in `testdata/valid/` and `testdata/invalid/`. When the official AI Resource Specification repository becomes available, it will be added as a git submodule at `testdata/spec/`.
+
+**Running Tests:**
+```bash
+go test ./...
+```
+
+**Test Coverage:**
+- Valid resource loading (Prompt, Promptset, Rule, Ruleset)
+- Invalid resource rejection with appropriate errors
+- Fragment resolution with Mustache templates
+- Multi-document YAML loading
+- Schema and semantic validation
+
+See `AUDIT.md` for conformance testing status and recommendations.

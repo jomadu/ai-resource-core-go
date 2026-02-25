@@ -82,8 +82,13 @@ func TestFragmentResolution(t *testing.T) {
 }
 
 func TestConformanceDiscovery(t *testing.T) {
-	validDir := "../../testdata/valid"
-	invalidDir := "../../testdata/invalid"
+	// Check for spec repository fixtures (preferred)
+	specValidDir := "../../testdata/spec/examples/valid"
+	specInvalidDir := "../../testdata/spec/examples/invalid"
+
+	// Fallback to local fixtures
+	localValidDir := "../../testdata/valid"
+	localInvalidDir := "../../testdata/invalid"
 
 	checkDir := func(dir string, shouldExist bool) {
 		_, err := os.Stat(dir)
@@ -91,9 +96,6 @@ func TestConformanceDiscovery(t *testing.T) {
 			t.Errorf("directory %s should exist", dir)
 		}
 	}
-
-	checkDir(validDir, true)
-	checkDir(invalidDir, true)
 
 	countFiles := func(dir string) int {
 		entries, err := os.ReadDir(dir)
@@ -109,8 +111,30 @@ func TestConformanceDiscovery(t *testing.T) {
 		return count
 	}
 
-	validCount := countFiles(validDir)
-	invalidCount := countFiles(invalidDir)
+	// Try spec fixtures first
+	specValidCount := countFiles(specValidDir)
+	specInvalidCount := countFiles(specInvalidDir)
+
+	if specValidCount > 0 || specInvalidCount > 0 {
+		t.Logf("Using spec repository fixtures: %d valid, %d invalid", specValidCount, specInvalidCount)
+		checkDir(specValidDir, true)
+		checkDir(specInvalidDir, true)
+		if specValidCount == 0 {
+			t.Error("no valid test fixtures found in spec repository")
+		}
+		if specInvalidCount == 0 {
+			t.Error("no invalid test fixtures found in spec repository")
+		}
+		return
+	}
+
+	// Fall back to local fixtures
+	t.Log("Spec repository not found, using local fixtures")
+	checkDir(localValidDir, true)
+	checkDir(localInvalidDir, true)
+
+	validCount := countFiles(localValidDir)
+	invalidCount := countFiles(localInvalidDir)
 
 	if validCount == 0 {
 		t.Error("no valid test fixtures found")
