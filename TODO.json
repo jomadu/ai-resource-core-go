@@ -1,0 +1,45 @@
+{
+  "tasks": [
+    {
+      "id": "TASK-001",
+      "priority": 1,
+      "status": "DONE",
+      "dependencies": [],
+      "description": "Update specs/conformance-testing.md - Add 5 sections: Source of Truth (spec repo URL), Makefile-Driven Workflow (standard commands), Submodule Requirements (hard requirements), Version Pinning Strategy (version management), Failure Policy (when tests must fail)",
+      "comments": [
+        "See TASK.md and PLAN.md for detailed requirements and rationale. These documents are temporary and will be deleted after tasks complete.",
+        "Completed 2026-02-25: Added all 5 required sections with prescriptive language (MUST), rationale, and clear error handling guidance."
+      ]
+    },
+    {
+      "id": "TASK-002",
+      "priority": 1,
+      "status": "TODO",
+      "dependencies": [],
+      "description": "Update README.md - Add Quick Start section (before detailed docs) with Makefile commands, update Testing section to lead with Makefile commands (not manual git submodule)",
+      "comments": [
+        "See TASK.md and PLAN.md for detailed requirements and rationale. These documents are temporary and will be deleted after tasks complete."
+      ]
+    },
+    {
+      "id": "TASK-003",
+      "priority": 2,
+      "status": "TODO",
+      "dependencies": [],
+      "description": "Update AGENTS.md - Update Quick Reference section with Makefile commands, update Operational Learnings section to document submodule as REQUIRED with troubleshooting guidance",
+      "comments": [
+        "See TASK.md and PLAN.md for detailed requirements and rationale. These documents are temporary and will be deleted after tasks complete."
+      ]
+    },
+    {
+      "id": "TASK-004",
+      "priority": 3,
+      "status": "TODO",
+      "dependencies": [],
+      "description": "Update specs/README.md - Add Conformance Philosophy section explaining rationale for submodule approach, interoperability benefits, and version pinning strategy",
+      "comments": [
+        "See TASK.md and PLAN.md for detailed requirements and rationale. These documents are temporary and will be deleted after tasks complete."
+      ]
+    }
+  ]
+}
