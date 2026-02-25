@@ -49,6 +49,52 @@
 - **Invalid Cases** - Ensure invalid resources fail with appropriate errors
 - **Test Reporting** - Clear pass/fail results with context
 
+## Conformance Philosophy
+
+This implementation uses **submodule-based conformance testing** as the industry standard approach for ensuring interoperability across AI Resource implementations.
+
+### Why Submodules
+
+The [AI Resource Specification](https://github.com/jomadu/ai-resource-spec) repository is the **source of truth** for what constitutes a valid AI Resource. This implementation is an **interpreter** of that specification. By using the official test suite as a git submodule, we ensure:
+
+- **No drift** - Tests come directly from the spec repository, not local copies
+- **Interoperability** - All implementations test against the same fixtures
+- **Traceability** - Each build pins to a specific spec version
+- **Early detection** - Breaking changes in the spec are caught immediately
+
+### Version Pinning Strategy
+
+Git submodules pin to a specific commit by default. This provides:
+
+- **Build stability** - Tests don't change unexpectedly
+- **Controlled updates** - Spec updates are explicit, reviewed changes
+- **Easier debugging** - Reproducible test failures across environments
+- **CI/CD reliability** - Builds are deterministic
+
+To update the spec version, use `make update-spec`, review changes, run tests, and commit the new pin if tests pass.
+
+### Makefile Interface
+
+The Makefile is the **documented interface** for all development tasks:
+
+- `make test` - Runs all tests (auto-initializes submodule)
+- `make test-conformance` - Runs conformance tests only
+- `make build` - Builds all packages
+- `make lint` - Runs linters
+- `make update-spec` - Updates spec to latest version
+
+This automation ensures developers don't need to manually manage submodules or remember git commands. The Makefile handles initialization, updates, and cleanup.
+
+### Failure Policy
+
+Conformance tests MUST fail if the submodule is missing or not initialized. There are no fallbacks to local fixtures. This hard requirement ensures:
+
+- **Explicit dependencies** - Developers know the spec is required
+- **No silent drift** - Missing fixtures cause immediate, visible failures
+- **Clear error messages** - Failures direct users to `make test`
+
+See [conformance-testing.md](conformance-testing.md) for detailed requirements and implementation guidance.
+
 ## Specification Documents
 
 ### Foundation

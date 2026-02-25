@@ -36,11 +36,12 @@
     {
       "id": "TASK-004",
       "priority": 3,
-      "status": "TODO",
+      "status": "DONE",
       "dependencies": [],
       "description": "Update specs/README.md - Add Conformance Philosophy section explaining rationale for submodule approach, interoperability benefits, and version pinning strategy",
       "comments": [
-        "See TASK.md and PLAN.md for detailed requirements and rationale. These documents are temporary and will be deleted after tasks complete."
+        "See TASK.md and PLAN.md for detailed requirements and rationale. These documents are temporary and will be deleted after tasks complete.",
+        "Completed 2026-02-25: Added Conformance Philosophy section with subsections on Why Submodules (prevents drift, ensures interoperability), Version Pinning Strategy (build stability, controlled updates), Makefile Interface (documented commands), and Failure Policy (hard requirement, no fallbacks). Links to conformance-testing.md for detailed guidance."
       ]
     }
   ]
