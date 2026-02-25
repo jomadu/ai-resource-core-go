@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"strings"
 
+	"github.com/aws/ai-resource-core-go/internal/schema"
 	"github.com/aws/ai-resource-core-go/internal/template"
 )
 
@@ -192,10 +193,7 @@ type FragmentRef struct {
 func ValidateInputs(fragmentID string, fragment Fragment, providedInputs map[string]interface{}) (map[string]interface{}, error) {
 	inputsWithDefaults := applyDefaults(providedInputs, fragment.Inputs)
 	
-	if err := validateInputTypes(fragmentID, fragment.Inputs, inputsWithDefaults); err != nil {
-		return nil, err
-	}
-	
+	// Check for undefined inputs
 	for name := range inputsWithDefaults {
 		if _, exists := fragment.Inputs[name]; !exists {
 			return nil, &InputError{
@@ -207,7 +205,67 @@ func ValidateInputs(fragmentID string, fragment Fragment, providedInputs map[str
 		}
 	}
 	
+	// Build JSON Schema from input definitions
+	jsonSchema := BuildSchemaFromInputs(fragment.Inputs)
+	
+	// Validate using JSON Schema
+	if err := schema.ValidateAgainstSchema(inputsWithDefaults, jsonSchema); err != nil {
+		return nil, convertSchemaErrorToInputError(fragmentID, err)
+	}
+	
 	return inputsWithDefaults, nil
+}
+
+func convertSchemaErrorToInputError(fragmentID string, err error) error {
+	if schemaErr, ok := err.(*schema.SchemaError); ok {
+		inputName := strings.TrimPrefix(schemaErr.Path, "(root).")
+		if inputName == "(root)" {
+			inputName = ""
+		}
+		
+		expected := "valid value"
+		got := "invalid value"
+		
+		// Parse "Invalid type. Expected: number, given: string"
+		if strings.Contains(schemaErr.Message, "Invalid type") {
+			parts := strings.Split(schemaErr.Message, ",")
+			if len(parts) >= 2 {
+				// Extract expected type
+				expectedPart := strings.TrimSpace(parts[0])
+				if idx := strings.Index(expectedPart, "Expected:"); idx != -1 {
+					expected = strings.TrimSpace(expectedPart[idx+9:])
+				}
+				// Extract given type
+				givenPart := strings.TrimSpace(parts[1])
+				if idx := strings.Index(givenPart, "given:"); idx != -1 {
+					got = strings.TrimSpace(givenPart[idx+6:])
+				}
+			}
+		} else if strings.Contains(schemaErr.Message, "required") {
+			expected = "required input"
+			got = "missing"
+		}
+		
+		return &InputError{
+			FragmentID: fragmentID,
+			InputName:  inputName,
+			Expected:   expected,
+			Got:        got,
+		}
+	}
+	
+	if multiErr, ok := err.(*schema.MultiError); ok {
+		if len(multiErr.Errors) > 0 {
+			return convertSchemaErrorToInputError(fragmentID, multiErr.Errors[0])
+		}
+	}
+	
+	return &InputError{
+		FragmentID: fragmentID,
+		InputName:  "",
+		Expected:   "valid input",
+		Got:        err.Error(),
+	}
 }
 
 func applyDefaults(provided map[string]interface{}, definitions map[string]InputDefinition) map[string]interface{} {
@@ -224,120 +282,6 @@ func applyDefaults(provided map[string]interface{}, definitions map[string]Input
 	}
 	
 	return result
-}
-
-func validateInputTypes(fragmentID string, definitions map[string]InputDefinition, inputs map[string]interface{}) error {
-	for name, def := range definitions {
-		value, exists := inputs[name]
-		
-		if !exists {
-			if def.Required {
-				return &InputError{
-					FragmentID: fragmentID,
-					InputName:  name,
-					Expected:   "required input",
-					Got:        "missing",
-				}
-			}
-			continue
-		}
-		
-		if err := validateType(fragmentID, name, def, value); err != nil {
-			return err
-		}
-	}
-	
-	return nil
-}
-
-func validateType(fragmentID, inputName string, def InputDefinition, value interface{}) error {
-	switch def.Type {
-	case InputTypeString:
-		if _, ok := value.(string); !ok {
-			return &InputError{
-				FragmentID: fragmentID,
-				InputName:  inputName,
-				Expected:   "string",
-				Got:        getTypeName(value),
-			}
-		}
-	case InputTypeNumber:
-		switch value.(type) {
-		case int, int8, int16, int32, int64, uint, uint8, uint16, uint32, uint64, float32, float64:
-			// Valid number types
-		default:
-			return &InputError{
-				FragmentID: fragmentID,
-				InputName:  inputName,
-				Expected:   "number",
-				Got:        getTypeName(value),
-			}
-		}
-	case InputTypeBoolean:
-		if _, ok := value.(bool); !ok {
-			return &InputError{
-				FragmentID: fragmentID,
-				InputName:  inputName,
-				Expected:   "boolean",
-				Got:        getTypeName(value),
-			}
-		}
-	case InputTypeArray:
-		arr, ok := value.([]interface{})
-		if !ok {
-			return &InputError{
-				FragmentID: fragmentID,
-				InputName:  inputName,
-				Expected:   "array",
-				Got:        getTypeName(value),
-			}
-		}
-		if def.Items != nil {
-			for i, item := range arr {
-				if err := validateType(fragmentID, inputName+"["+string(rune(i))+ "]", *def.Items, item); err != nil {
-					return err
-				}
-			}
-		}
-	case InputTypeObject:
-		obj, ok := value.(map[string]interface{})
-		if !ok {
-			return &InputError{
-				FragmentID: fragmentID,
-				InputName:  inputName,
-				Expected:   "object",
-				Got:        getTypeName(value),
-			}
-		}
-		if def.Properties != nil {
-			for propName, propDef := range def.Properties {
-				if propValue, exists := obj[propName]; exists {
-					if err := validateType(fragmentID, inputName+"."+propName, propDef, propValue); err != nil {
-						return err
-					}
-				}
-			}
-		}
-	}
-	
-	return nil
-}
-
-func getTypeName(value interface{}) string {
-	switch value.(type) {
-	case string:
-		return "string"
-	case int, int8, int16, int32, int64, uint, uint8, uint16, uint32, uint64, float32, float64:
-		return "number"
-	case bool:
-		return "boolean"
-	case []interface{}:
-		return "array"
-	case map[string]interface{}:
-		return "object"
-	default:
-		return "unknown"
-	}
 }
 
 // ResolveBody resolves a body by processing fragment references and rendering templates.

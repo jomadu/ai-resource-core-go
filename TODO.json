@@ -16,13 +16,14 @@
     {
       "id": "TASK-002",
       "priority": 2,
-      "status": "TODO",
+      "status": "DONE",
       "dependencies": ["TASK-001"],
       "description": "Fragment Input Validation via JSON Schema - Refactor ValidateInputs() to use BuildSchemaFromInputs() and internal/schema/validator.go, remove manual validateType() function, update error handling to convert JSON Schema errors to InputError format, update tests",
       "comments": [
         "Spec compliance - implementation uses manual type checking instead of JSON Schema",
         "Estimated effort: 2-3 hours",
-        "Spec: specs/fragment-input-validation.md"
+        "Spec: specs/fragment-input-validation.md",
+        "Completed: Added ValidateAgainstSchema() to internal/schema/validator.go, refactored ValidateInputs() to use JSON Schema validation, removed manual validateType/validateInputTypes/getTypeName functions, added convertSchemaErrorToInputError() to parse JSON Schema errors into InputError format. All tests pass."
       ]
     },
     {

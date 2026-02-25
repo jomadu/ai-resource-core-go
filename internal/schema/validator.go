@@ -107,3 +107,42 @@ func getSchemaForKind(kind string) (string, error) {
 		return "", fmt.Errorf("no schema for kind: %s", kind)
 	}
 }
+
+// ValidateAgainstSchema validates data against a JSON Schema.
+func ValidateAgainstSchema(data interface{}, schema map[string]interface{}) error {
+	dataJSON, err := json.Marshal(data)
+	if err != nil {
+		return fmt.Errorf("failed to marshal data: %w", err)
+	}
+
+	schemaJSON, err := json.Marshal(schema)
+	if err != nil {
+		return fmt.Errorf("failed to marshal schema: %w", err)
+	}
+
+	schemaLoader := gojsonschema.NewBytesLoader(schemaJSON)
+	documentLoader := gojsonschema.NewBytesLoader(dataJSON)
+
+	result, err := gojsonschema.Validate(schemaLoader, documentLoader)
+	if err != nil {
+		return fmt.Errorf("schema validation failed: %w", err)
+	}
+
+	if !result.Valid() {
+		errors := make([]error, 0, len(result.Errors()))
+		for _, err := range result.Errors() {
+			errors = append(errors, &SchemaError{
+				Path:    err.Field(),
+				Message: err.Description(),
+			})
+		}
+
+		if len(errors) == 1 {
+			return errors[0]
+		}
+
+		return &MultiError{Errors: errors}
+	}
+
+	return nil
+}
