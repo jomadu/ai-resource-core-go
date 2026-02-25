@@ -14,11 +14,12 @@
     {
       "id": "TASK-002",
       "priority": 1,
-      "status": "TODO",
+      "status": "DONE",
       "dependencies": [],
       "description": "Update README.md - Add Quick Start section (before detailed docs) with Makefile commands, update Testing section to lead with Makefile commands (not manual git submodule)",
       "comments": [
-        "See TASK.md and PLAN.md for detailed requirements and rationale. These documents are temporary and will be deleted after tasks complete."
+        "See TASK.md and PLAN.md for detailed requirements and rationale. These documents are temporary and will be deleted after tasks complete.",
+        "Completed 2026-02-25: Added Quick Start section with Makefile commands, updated Testing section to lead with Makefile (manual workflow shown as alternative), included spec repository URL."
       ]
     },
     {
