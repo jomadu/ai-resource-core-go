@@ -62,7 +62,6 @@ func ValidateSemantic(resource *Resource) error {
 func validatePromptSpec(spec *PromptSpec) []error {
 	var errors []error
 
-	// Validate fragment keys
 	for key := range spec.Fragments {
 		if !idPattern.MatchString(key) {
 			errors = append(errors, &ValidationError{
@@ -72,7 +71,6 @@ func validatePromptSpec(spec *PromptSpec) []error {
 		}
 	}
 
-	// Validate body
 	errors = append(errors, validateBody(spec.Body, spec.Fragments)...)
 
 	return errors
@@ -81,7 +79,6 @@ func validatePromptSpec(spec *PromptSpec) []error {
 func validateRuleSpec(spec *RuleSpec) []error {
 	var errors []error
 
-	// Validate fragment keys
 	for key := range spec.Fragments {
 		if !idPattern.MatchString(key) {
 			errors = append(errors, &ValidationError{
@@ -91,7 +88,6 @@ func validateRuleSpec(spec *RuleSpec) []error {
 		}
 	}
 
-	// Validate body
 	errors = append(errors, validateBody(spec.Body, spec.Fragments)...)
 
 	return errors
@@ -143,7 +139,6 @@ func validateFragmentRef(index int, ref *FragmentRef, fragments map[string]Fragm
 		return errors
 	}
 
-	// Validate fragment inputs
 	_, err := ValidateInputs(ref.Fragment, fragment, ref.Inputs)
 	if err != nil {
 		errors = append(errors, &ValidationError{
@@ -156,55 +151,9 @@ func validateFragmentRef(index int, ref *FragmentRef, fragments map[string]Fragm
 	return errors
 }
 
-func validatePromptset(promptset *Promptset) []error {
-	var errors []error
-
-	// Validate fragment keys
-	for key := range promptset.Spec.Fragments {
-		if !idPattern.MatchString(key) {
-			errors = append(errors, &ValidationError{
-				Field:   fmt.Sprintf("spec.fragments[%s]", key),
-				Message: fmt.Sprintf("fragment key does not match pattern ^[a-zA-Z0-9_-]+$: %q", key),
-			})
-		}
-	}
-
-	// Validate collection keys
-	for key := range promptset.Spec.Prompts {
-		if !idPattern.MatchString(key) {
-			errors = append(errors, &ValidationError{
-				Field:   fmt.Sprintf("spec.prompts[%s]", key),
-				Message: fmt.Sprintf("prompt key does not match pattern ^[a-zA-Z0-9_-]+$: %q", key),
-			})
-		}
-	}
-
-	// Validate minimum one prompt
-	if len(promptset.Spec.Prompts) == 0 {
-		errors = append(errors, &ValidationError{
-			Field:   "spec.prompts",
-			Message: "promptset must have at least one prompt",
-		})
-	}
-
-	// Validate each prompt body
-	for key, prompt := range promptset.Spec.Prompts {
-		bodyErrors := validateBody(prompt.Body, promptset.Spec.Fragments)
-		for _, err := range bodyErrors {
-			if ve, ok := err.(*ValidationError); ok {
-				ve.Field = fmt.Sprintf("spec.prompts[%s].%s", key, ve.Field)
-			}
-			errors = append(errors, err)
-		}
-	}
-
-	return errors
-}
-
 func validatePromptsetSpec(spec *PromptsetSpec) []error {
 	var errors []error
 
-	// Validate fragment keys
 	for key := range spec.Fragments {
 		if !idPattern.MatchString(key) {
 			errors = append(errors, &ValidationError{
@@ -214,7 +163,6 @@ func validatePromptsetSpec(spec *PromptsetSpec) []error {
 		}
 	}
 
-	// Validate collection keys
 	for key := range spec.Prompts {
 		if !idPattern.MatchString(key) {
 			errors = append(errors, &ValidationError{
@@ -224,7 +172,6 @@ func validatePromptsetSpec(spec *PromptsetSpec) []error {
 		}
 	}
 
-	// Validate minimum one prompt
 	if len(spec.Prompts) == 0 {
 		errors = append(errors, &ValidationError{
 			Field:   "spec.prompts",
@@ -232,7 +179,6 @@ func validatePromptsetSpec(spec *PromptsetSpec) []error {
 		})
 	}
 
-	// Validate each prompt body
 	for key, prompt := range spec.Prompts {
 		bodyErrors := validateBody(prompt.Body, spec.Fragments)
 		for _, err := range bodyErrors {
@@ -249,7 +195,6 @@ func validatePromptsetSpec(spec *PromptsetSpec) []error {
 func validateRulesetSpec(spec *RulesetSpec) []error {
 	var errors []error
 
-	// Validate fragment keys
 	for key := range spec.Fragments {
 		if !idPattern.MatchString(key) {
 			errors = append(errors, &ValidationError{
@@ -259,7 +204,6 @@ func validateRulesetSpec(spec *RulesetSpec) []error {
 		}
 	}
 
-	// Validate collection keys
 	for key := range spec.Rules {
 		if !idPattern.MatchString(key) {
 			errors = append(errors, &ValidationError{
@@ -269,7 +213,6 @@ func validateRulesetSpec(spec *RulesetSpec) []error {
 		}
 	}
 
-	// Validate minimum one rule
 	if len(spec.Rules) == 0 {
 		errors = append(errors, &ValidationError{
 			Field:   "spec.rules",
@@ -277,7 +220,6 @@ func validateRulesetSpec(spec *RulesetSpec) []error {
 		})
 	}
 
-	// Validate each rule body
 	for key, rule := range spec.Rules {
 		bodyErrors := validateBody(rule.Body, spec.Fragments)
 		for _, err := range bodyErrors {
