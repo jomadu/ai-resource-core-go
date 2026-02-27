@@ -6,13 +6,18 @@ This directory contains test fixtures for the ai-resource-core-go project.
 
 ```
 testdata/
-├── spec/              # Git submodule → official AI Resource Specification test suite
-│   └── schema/
-│       └── draft/
-│           └── tests/
-│               ├── valid/    # Valid resource examples from spec
-│               └── invalid/  # Invalid resource examples from spec
-└── README.md          # This file
+└── README.md          # This file (documentation only)
+
+internal/
+  assets/
+    spec/              # Git submodule → official AI Resource Specification
+      schema/
+        draft/
+          *.schema.json       # JSON schemas
+          tests/
+            valid/            # Valid resource examples from spec
+            invalid/          # Invalid resource examples from spec
+    assets.go          # Embeds schemas and fixtures via go:embed
 ```
 
 ## Test Types
@@ -23,12 +28,12 @@ testdata/
 
 **Purpose:** Verify that the Go implementation correctly interprets AI Resources according to the official specification.
 
-**Fixtures:** Uses official test fixtures from `testdata/spec/` (git submodule)
+**Fixtures:** Uses official test fixtures embedded from `internal/assets/spec/` (git submodule)
 
 **Requirements:**
-- MUST use official fixtures from ai-resource-spec repository
-- MUST fail explicitly if submodule is not initialized
-- MUST NOT fall back to local fixtures
+- Fixtures are embedded in the binary via `go:embed` directives
+- Submodule MUST be initialized before building
+- Tests access fixtures via `assets.ValidFixtures()` and `assets.InvalidFixtures()`
 
 **Running:**
 ```bash
@@ -57,7 +62,7 @@ make test
 
 ### Official Fixtures (Conformance)
 
-The official test suite is maintained in the [AI Resource Specification](https://github.com/jomadu/ai-resource-spec) repository and referenced via git submodule.
+The official test suite is maintained in the [AI Resource Specification](https://github.com/jomadu/ai-resource-spec) repository and embedded via git submodule at `internal/assets/spec/`.
 
 **Initial setup:**
 ```bash
@@ -73,6 +78,7 @@ make update-spec
 - Submodule references a specific commit (not a branch)
 - Updates are intentional and controlled
 - Each update is reviewed, tested, and committed explicitly
+- Fixtures are embedded at build time via `go:embed`
 
 ### Local Fixtures (Unit Tests)
 
@@ -84,27 +90,25 @@ Unit tests create fixtures dynamically using `t.TempDir()` and `os.WriteFile()`.
 
 ## Best Practices
 
-1. **Conformance tests** - Use official fixtures only, no local fallbacks
+1. **Conformance tests** - Use embedded fixtures via `internal/assets` package
 2. **Unit tests** - Generate fixtures in test code, don't commit fixture files
-3. **Submodule** - Always initialize before running conformance tests
+3. **Submodule** - Always initialize before building (for go:embed to work)
 4. **Updates** - Use `make update-spec` to update official fixtures
 5. **CI/CD** - Use `make test` (handles submodule initialization automatically)
 
 ## Troubleshooting
 
-**Error: "Conformance test fixtures not found"**
+**Error: "No valid/invalid test fixtures found"**
 ```bash
-make test  # Auto-initializes submodule
-```
-
-**Error: "No test fixtures found"**
-```bash
+# Submodule not initialized before build
 git submodule update --init --recursive
+make build
+make test
 ```
 
 **Submodule out of date:**
 ```bash
 make update-spec
-git add testdata/spec
+git add internal/assets/spec
 git commit -m "Update spec to vX.Y.Z"
 ```

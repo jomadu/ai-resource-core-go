@@ -105,11 +105,14 @@
     {
       "id": "TASK-009",
       "priority": 3,
-      "status": "TODO",
+      "status": "DONE",
       "dependencies": ["TASK-006"],
       "description": "Update README.md and AGENTS.md with new structure",
       "comments": [
-        "See PLAN.md: Implementation Steps > 8. Update Documentation"
+        "See PLAN.md: Implementation Steps > 8. Update Documentation",
+        "Completed: Updated README.md to reference internal/assets/spec and go:embed",
+        "Updated AGENTS.md to remove testdata/ from excludes",
+        "Updated testdata/README.md to document new embedded fixture structure"
       ]
     },
     {

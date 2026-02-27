@@ -59,7 +59,7 @@ make lint   # Run linters
 make help   # Show all commands
 ```
 
-Conformance tests automatically use the official [AI Resource Specification](https://github.com/jomadu/ai-resource-spec) test suite via git submodule. The Makefile handles initialization.
+Conformance tests automatically use the official [AI Resource Specification](https://github.com/jomadu/ai-resource-spec) test suite embedded via git submodule. The Makefile handles initialization.
 
 ## Testing
 
@@ -74,7 +74,7 @@ make test-conformance  # Run conformance tests only
 make update-spec       # Update spec to latest version
 ```
 
-The conformance tests use the official [AI Resource Specification](https://github.com/jomadu/ai-resource-spec) test suite via git submodule at `testdata/spec/`. The Makefile automatically initializes the submodule when running tests.
+The conformance tests use the official [AI Resource Specification](https://github.com/jomadu/ai-resource-spec) test suite embedded via git submodule at `internal/assets/spec/`. Schemas and test fixtures are embedded in the binary using `go:embed`. The Makefile automatically initializes the submodule when running tests.
 
 **Manual Workflow (Alternative):**
 ```bash

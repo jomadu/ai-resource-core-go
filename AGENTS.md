@@ -71,7 +71,7 @@ Patterns:
 - `internal/template/*.go` - Mustache rendering
 - `internal/types/*.go` - Type validation
 
-Excludes: `testdata/`, `.git/`
+Excludes: `.git/`
 
 ## Audit Output
 
