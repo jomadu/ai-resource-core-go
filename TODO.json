@@ -5,128 +5,130 @@
       "priority": 1,
       "status": "DONE",
       "dependencies": [],
-      "description": "Move git submodule from testdata/spec/ to internal/assets/spec/",
+      "description": "Integrate fragment input validation into semantic validation pipeline",
       "comments": [
-        "See PLAN.md: Implementation Steps > 2. Move Git Submodule",
-        "Completed: Submodule moved successfully, .gitmodules updated, verified schemas and test fixtures present"
+        "See AUDIT.md Gap #1 (HIGH PRIORITY)",
+        "File: pkg/airesource/validator.go",
+        "Function: validateFragmentRef()",
+        "Action: Call ValidateInputs() for each fragment reference",
+        "ValidateInputs() already exists in pkg/airesource/fragment.go line 193",
+        "Currently invalid inputs pass validation and fail during resolution",
+        "Estimated effort: 30 minutes",
+        "COMPLETED: ValidateInputs() is already called in validateFragmentRef() line 142. Implementation complete."
       ]
     },
     {
       "id": "TASK-002",
       "priority": 1,
       "status": "DONE",
-      "dependencies": ["TASK-001"],
-      "description": "Create internal/assets package with embed directives for schemas and test fixtures",
+      "dependencies": [],
+      "description": "Add collection key pattern validation for fragments, prompts, and rules",
       "comments": [
-        "See PLAN.md: Implementation Steps > 1. Create internal/assets Package",
-        "Completed: Created internal/assets/assets.go with embed directives for schemas and test fixtures",
-        "Implemented GetSchema(version, kind), ValidFixtures(version), InvalidFixtures(version)",
-        "All tests pass: go test ./internal/assets"
+        "See AUDIT.md Gap #2 (HIGH PRIORITY)",
+        "File: pkg/airesource/validator.go",
+        "Pattern: ^[a-zA-Z0-9_-]+$",
+        "Add validation in:",
+        "- validatePromptSpec() for fragment keys",
+        "- validatePromptsetSpec() for fragment and prompt keys",
+        "- validateRuleSpec() for fragment keys",
+        "- validateRulesetSpec() for fragment and rule keys",
+        "Currently keys like 'invalid key!' are accepted",
+        "Estimated effort: 1 hour",
+        "COMPLETED: All key pattern validations already implemented in validator.go"
       ]
     },
     {
       "id": "TASK-003",
-      "priority": 1,
+      "priority": 2,
       "status": "DONE",
-      "dependencies": ["TASK-002"],
-      "description": "Update internal/schema package to use internal/assets for schemas",
+      "dependencies": [],
+      "description": "Add empty collection validation for promptsets and rulesets",
       "comments": [
-        "See PLAN.md: Implementation Steps > 3. Update internal/schema Package",
-        "Completed: Updated validator.go to use assets.GetSchema() instead of hardcoded schemas",
-        "Deleted internal/schema/schemas.go (no longer needed)",
-        "Tests pass: go test ./internal/schema"
+        "See AUDIT.md Gap #3 (MEDIUM PRIORITY)",
+        "File: pkg/airesource/validator.go",
+        "Functions: validatePromptsetSpec(), validateRulesetSpec()",
+        "Action: Require len(spec.Prompts) > 0 and len(spec.Rules) > 0",
+        "Currently empty collections pass validation",
+        "Estimated effort: 15 minutes",
+        "COMPLETED: Empty collection checks already implemented in validator.go lines 173, 217"
       ]
     },
     {
       "id": "TASK-004",
-      "priority": 1,
+      "priority": 2,
       "status": "DONE",
-      "dependencies": ["TASK-002"],
-      "description": "Update pkg/airesource/conformance_test.go to use internal/assets",
+      "dependencies": [],
+      "description": "Add glob pattern validation for rule scope.files",
       "comments": [
-        "See PLAN.md: Implementation Steps > 4. Update Conformance Tests",
-        "Completed: Updated conformance_test.go to use assets.ValidFixtures() and assets.InvalidFixtures()",
-        "Removed hardcoded paths to testdata/spec/",
-        "All conformance tests pass: go test ./pkg/airesource/... -run TestConformance"
+        "See AUDIT.md Gap #4 (MEDIUM PRIORITY)",
+        "File: pkg/airesource/validator.go",
+        "Function: validateRuleSpec()",
+        "Action: Validate scope.files patterns using filepath.Match() or similar",
+        "Currently malformed globs like '[invalid' are accepted",
+        "Estimated effort: 30 minutes",
+        "COMPLETED: Added glob validation in validateRuleSpec() and validateRulesetSpec()"
       ]
     },
     {
       "id": "TASK-005",
-      "priority": 2,
-      "status": "DONE",
-      "dependencies": ["TASK-001"],
-      "description": "Update Makefile to reference new submodule path",
+      "priority": 3,
+      "status": "TODO",
+      "dependencies": [],
+      "description": "Apply rule priority default value of 100",
       "comments": [
-        "See PLAN.md: Implementation Steps > 5. Update Makefile",
-        "Completed: Updated test, test-conformance, and update-spec targets",
-        "Changed paths from testdata/spec to internal/assets/spec",
-        "Verified: make test runs successfully"
+        "See AUDIT.md Gap #5 (LOW PRIORITY)",
+        "File: pkg/airesource/rule.go or loader.go",
+        "Action: Apply default value of 100 when priority not specified",
+        "Currently defaults to 0 instead of spec-defined 100",
+        "Options: Custom UnmarshalYAML, post-load processing, or change to *int",
+        "Estimated effort: 30 minutes"
       ]
     },
     {
       "id": "TASK-006",
-      "priority": 2,
-      "status": "DONE",
-      "dependencies": ["TASK-003", "TASK-004"],
-      "description": "Delete duplicated test fixtures from testdata/",
+      "priority": 3,
+      "status": "TODO",
+      "dependencies": [],
+      "description": "Document validation pipeline fail-fast behavior",
       "comments": [
-        "See PLAN.md: Implementation Steps > 6. Delete Duplicated Test Fixtures",
-        "Completed: Deleted testdata/valid/ and testdata/invalid/ directories",
-        "Verified no code references these paths",
-        "All tests still pass after deletion"
+        "See AUDIT.md Gap #6 (LOW PRIORITY)",
+        "File: pkg/airesource/loader.go",
+        "Action: Add comments explaining fail-fast behavior between phases",
+        "Verify loadResourceSync() implements: schema validation → semantic validation (fail-fast)",
+        "Within each phase: collect all errors",
+        "Between phases: stop on first failure",
+        "Add test cases verifying fail-fast behavior",
+        "Estimated effort: 15 minutes"
       ]
     },
     {
       "id": "TASK-007",
-      "priority": 3,
-      "status": "DONE",
-      "dependencies": ["TASK-006"],
-      "description": "Update specs/conformance-testing.md with new paths and structure",
+      "priority": 1,
+      "status": "TODO",
+      "dependencies": ["TASK-001", "TASK-002"],
+      "description": "Run conformance tests after high-priority validation fixes",
       "comments": [
-        "See PLAN.md: Implementation Steps > 7. Update Specifications (conformance-testing.md)",
-        "Completed: Updated all references from testdata/spec to internal/assets/spec",
-        "Updated documentation to reflect embedded fixtures via go:embed",
-        "Updated examples, workflows, and implementation mapping"
+        "See AUDIT.md Recommended Actions",
+        "Command: make test-conformance",
+        "Verify fixes for gaps #1 and #2 pass conformance tests",
+        "Update AUDIT.md with new conformance status",
+        "Estimated effort: 15 minutes"
       ]
     },
     {
       "id": "TASK-008",
-      "priority": 3,
-      "status": "DONE",
-      "dependencies": ["TASK-006"],
-      "description": "Update specs/schema-validation.md with new implementation mapping",
+      "priority": 2,
+      "status": "TODO",
+      "dependencies": ["TASK-001", "TASK-002", "TASK-003", "TASK-004"],
+      "description": "Add test cases for all validation gap fixes",
       "comments": [
-        "See PLAN.md: Implementation Steps > 7. Update Specifications (schema-validation.md)",
-        "Completed: Updated implementation mapping to reference internal/assets",
-        "Documented schema loading via assets.GetSchema()",
-        "Updated dependencies section"
-      ]
-    },
-    {
-      "id": "TASK-009",
-      "priority": 3,
-      "status": "DONE",
-      "dependencies": ["TASK-006"],
-      "description": "Update README.md and AGENTS.md with new structure",
-      "comments": [
-        "See PLAN.md: Implementation Steps > 8. Update Documentation",
-        "Completed: Updated README.md to reference internal/assets/spec and go:embed",
-        "Updated AGENTS.md to remove testdata/ from excludes",
-        "Updated testdata/README.md to document new embedded fixture structure"
-      ]
-    },
-    {
-      "id": "TASK-010",
-      "priority": 1,
-      "status": "DONE",
-      "dependencies": ["TASK-003", "TASK-004", "TASK-005"],
-      "description": "Run full test suite and verify all tests pass",
-      "comments": [
-        "See PLAN.md: Testing Strategy > Verification Steps > Step 7",
-        "Completed: All tests pass (go test ./... -v)",
-        "Build successful: make build",
-        "Lint successful: make lint",
-        "All packages verified: internal/assets, internal/schema, pkg/airesource"
+        "See AUDIT.md Testing Recommendations",
+        "For each gap fix, add:",
+        "- Test case with invalid input that should be rejected",
+        "- Verify error message is clear and actionable",
+        "- Test case with valid input that should pass",
+        "- Update conformance tests if official fixtures exist",
+        "Estimated effort: 2 hours"
       ]
     }
   ]

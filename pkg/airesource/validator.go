@@ -2,6 +2,7 @@ package airesource
 
 import (
 	"fmt"
+	"path/filepath"
 	"regexp"
 )
 
@@ -85,6 +86,18 @@ func validateRuleSpec(spec *RuleSpec) []error {
 				Field:   fmt.Sprintf("spec.fragments[%s]", key),
 				Message: fmt.Sprintf("fragment key does not match pattern ^[a-zA-Z0-9_-]+$: %q", key),
 			})
+		}
+	}
+
+	for i, scope := range spec.Scope {
+		for j, pattern := range scope.Files {
+			if _, err := filepath.Match(pattern, ""); err != nil {
+				errors = append(errors, &ValidationError{
+					Field:   fmt.Sprintf("spec.scope[%d].files[%d]", i, j),
+					Message: fmt.Sprintf("invalid glob pattern: %q", pattern),
+					Cause:   err,
+				})
+			}
 		}
 	}
 
@@ -221,6 +234,18 @@ func validateRulesetSpec(spec *RulesetSpec) []error {
 	}
 
 	for key, rule := range spec.Rules {
+		for i, scope := range rule.Scope {
+			for j, pattern := range scope.Files {
+				if _, err := filepath.Match(pattern, ""); err != nil {
+					errors = append(errors, &ValidationError{
+						Field:   fmt.Sprintf("spec.rules[%s].scope[%d].files[%d]", key, i, j),
+						Message: fmt.Sprintf("invalid glob pattern: %q", pattern),
+						Cause:   err,
+					})
+				}
+			}
+		}
+
 		bodyErrors := validateBody(rule.Body, spec.Fragments)
 		for _, err := range bodyErrors {
 			if ve, ok := err.(*ValidationError); ok {
