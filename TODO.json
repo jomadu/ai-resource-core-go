@@ -1,0 +1,108 @@
+{
+  "tasks": [
+    {
+      "id": "TASK-001",
+      "priority": 1,
+      "status": "DONE",
+      "dependencies": [],
+      "description": "Move git submodule from testdata/spec/ to internal/assets/spec/",
+      "comments": [
+        "See PLAN.md: Implementation Steps > 2. Move Git Submodule",
+        "Completed: Submodule moved successfully, .gitmodules updated, verified schemas and test fixtures present"
+      ]
+    },
+    {
+      "id": "TASK-002",
+      "priority": 1,
+      "status": "DONE",
+      "dependencies": ["TASK-001"],
+      "description": "Create internal/assets package with embed directives for schemas and test fixtures",
+      "comments": [
+        "See PLAN.md: Implementation Steps > 1. Create internal/assets Package",
+        "Completed: Created internal/assets/assets.go with embed directives for schemas and test fixtures",
+        "Implemented GetSchema(version, kind), ValidFixtures(version), InvalidFixtures(version)",
+        "All tests pass: go test ./internal/assets"
+      ]
+    },
+    {
+      "id": "TASK-003",
+      "priority": 1,
+      "status": "TODO",
+      "dependencies": ["TASK-002"],
+      "description": "Update internal/schema package to use internal/assets for schemas",
+      "comments": [
+        "See PLAN.md: Implementation Steps > 3. Update internal/schema Package"
+      ]
+    },
+    {
+      "id": "TASK-004",
+      "priority": 1,
+      "status": "TODO",
+      "dependencies": ["TASK-002"],
+      "description": "Update pkg/airesource/conformance_test.go to use internal/assets",
+      "comments": [
+        "See PLAN.md: Implementation Steps > 4. Update Conformance Tests"
+      ]
+    },
+    {
+      "id": "TASK-005",
+      "priority": 2,
+      "status": "TODO",
+      "dependencies": ["TASK-001"],
+      "description": "Update Makefile to reference new submodule path",
+      "comments": [
+        "See PLAN.md: Implementation Steps > 5. Update Makefile"
+      ]
+    },
+    {
+      "id": "TASK-006",
+      "priority": 2,
+      "status": "TODO",
+      "dependencies": ["TASK-003", "TASK-004"],
+      "description": "Delete duplicated test fixtures from testdata/",
+      "comments": [
+        "See PLAN.md: Implementation Steps > 6. Delete Duplicated Test Fixtures"
+      ]
+    },
+    {
+      "id": "TASK-007",
+      "priority": 3,
+      "status": "TODO",
+      "dependencies": ["TASK-006"],
+      "description": "Update specs/conformance-testing.md with new paths and structure",
+      "comments": [
+        "See PLAN.md: Implementation Steps > 7. Update Specifications (conformance-testing.md)"
+      ]
+    },
+    {
+      "id": "TASK-008",
+      "priority": 3,
+      "status": "TODO",
+      "dependencies": ["TASK-006"],
+      "description": "Update specs/schema-validation.md with new implementation mapping",
+      "comments": [
+        "See PLAN.md: Implementation Steps > 7. Update Specifications (schema-validation.md)"
+      ]
+    },
+    {
+      "id": "TASK-009",
+      "priority": 3,
+      "status": "TODO",
+      "dependencies": ["TASK-006"],
+      "description": "Update README.md and AGENTS.md with new structure",
+      "comments": [
+        "See PLAN.md: Implementation Steps > 8. Update Documentation"
+      ]
+    },
+    {
+      "id": "TASK-010",
+      "priority": 1,
+      "status": "TODO",
+      "dependencies": ["TASK-003", "TASK-004", "TASK-005"],
+      "description": "Run full test suite and verify all tests pass",
+      "comments": [
+        "See PLAN.md: Testing Strategy > Verification Steps > Step 7"
+      ]
+    }
+  ]
+}
