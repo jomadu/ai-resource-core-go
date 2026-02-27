@@ -92,11 +92,14 @@
     {
       "id": "TASK-008",
       "priority": 3,
-      "status": "TODO",
+      "status": "DONE",
       "dependencies": ["TASK-006"],
       "description": "Update specs/schema-validation.md with new implementation mapping",
       "comments": [
-        "See PLAN.md: Implementation Steps > 7. Update Specifications (schema-validation.md)"
+        "See PLAN.md: Implementation Steps > 7. Update Specifications (schema-validation.md)",
+        "Completed: Updated implementation mapping to reference internal/assets",
+        "Documented schema loading via assets.GetSchema()",
+        "Updated dependencies section"
       ]
     },
     {
