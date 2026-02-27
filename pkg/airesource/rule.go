@@ -53,3 +53,14 @@ type RuleItem struct {
 	Scope       []ScopeEntry `yaml:"scope,omitempty" json:"scope,omitempty"`
 	Body        Body        `yaml:"body" json:"body"`
 }
+
+// UnmarshalYAML implements custom unmarshaling to apply default priority.
+func (r *RuleItem) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	type rawRuleItem RuleItem
+	raw := rawRuleItem{Priority: 100}
+	if err := unmarshal(&raw); err != nil {
+		return err
+	}
+	*r = RuleItem(raw)
+	return nil
+}

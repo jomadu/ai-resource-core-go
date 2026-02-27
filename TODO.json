@@ -72,7 +72,7 @@
     {
       "id": "TASK-005",
       "priority": 3,
-      "status": "TODO",
+      "status": "DONE",
       "dependencies": [],
       "description": "Apply rule priority default value of 100",
       "comments": [
@@ -81,7 +81,8 @@
         "Action: Apply default value of 100 when priority not specified",
         "Currently defaults to 0 instead of spec-defined 100",
         "Options: Custom UnmarshalYAML, post-load processing, or change to *int",
-        "Estimated effort: 30 minutes"
+        "Estimated effort: 30 minutes",
+        "COMPLETED: Added UnmarshalYAML to RuleItem to apply default priority of 100"
       ]
     },
     {
@@ -104,7 +105,7 @@
     {
       "id": "TASK-007",
       "priority": 1,
-      "status": "TODO",
+      "status": "DONE",
       "dependencies": ["TASK-001", "TASK-002"],
       "description": "Run conformance tests after high-priority validation fixes",
       "comments": [
@@ -112,7 +113,8 @@
         "Command: make test-conformance",
         "Verify fixes for gaps #1 and #2 pass conformance tests",
         "Update AUDIT.md with new conformance status",
-        "Estimated effort: 15 minutes"
+        "Estimated effort: 15 minutes",
+        "COMPLETED: Conformance tests pass successfully"
       ]
     },
     {
