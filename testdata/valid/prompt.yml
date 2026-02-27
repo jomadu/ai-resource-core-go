@@ -1,7 +1,0 @@
-apiVersion: ai-resource/draft
-kind: Prompt
-metadata:
-  id: test-prompt
-  name: Test Prompt
-spec:
-  body: "This is a test prompt"

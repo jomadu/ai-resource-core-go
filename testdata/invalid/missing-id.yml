@@ -1,6 +1,0 @@
-apiVersion: ai-resource/draft
-kind: Prompt
-metadata:
-  name: "No ID"
-spec:
-  body: "Test"

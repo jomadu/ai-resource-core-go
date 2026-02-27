@@ -66,11 +66,14 @@
     {
       "id": "TASK-006",
       "priority": 2,
-      "status": "TODO",
+      "status": "DONE",
       "dependencies": ["TASK-003", "TASK-004"],
       "description": "Delete duplicated test fixtures from testdata/",
       "comments": [
-        "See PLAN.md: Implementation Steps > 6. Delete Duplicated Test Fixtures"
+        "See PLAN.md: Implementation Steps > 6. Delete Duplicated Test Fixtures",
+        "Completed: Deleted testdata/valid/ and testdata/invalid/ directories",
+        "Verified no code references these paths",
+        "All tests still pass after deletion"
       ]
     },
     {

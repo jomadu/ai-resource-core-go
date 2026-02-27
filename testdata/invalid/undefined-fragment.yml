@@ -1,8 +1,0 @@
-apiVersion: ai-resource/draft
-kind: Prompt
-metadata:
-  id: test
-  name: Test
-spec:
-  body:
-    - fragment: nonexistent

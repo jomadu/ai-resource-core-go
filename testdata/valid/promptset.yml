@@ -1,9 +1,0 @@
-apiVersion: ai-resource/draft
-kind: Promptset
-metadata:
-  id: test-promptset
-  name: Test Promptset
-spec:
-  prompts:
-    main:
-      body: "Main prompt"

@@ -1,7 +1,0 @@
-apiVersion: ai-resource/v999
-kind: Prompt
-metadata:
-  id: test
-  name: Test
-spec:
-  body: "Test"
