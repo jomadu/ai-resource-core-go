@@ -79,11 +79,14 @@
     {
       "id": "TASK-007",
       "priority": 3,
-      "status": "TODO",
+      "status": "DONE",
       "dependencies": ["TASK-006"],
       "description": "Update specs/conformance-testing.md with new paths and structure",
       "comments": [
-        "See PLAN.md: Implementation Steps > 7. Update Specifications (conformance-testing.md)"
+        "See PLAN.md: Implementation Steps > 7. Update Specifications (conformance-testing.md)",
+        "Completed: Updated all references from testdata/spec to internal/assets/spec",
+        "Updated documentation to reflect embedded fixtures via go:embed",
+        "Updated examples, workflows, and implementation mapping"
       ]
     },
     {
