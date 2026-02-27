@@ -3,6 +3,8 @@ package airesource
 import (
 	"strings"
 	"testing"
+
+	"gopkg.in/yaml.v3"
 )
 
 // Unit tests for semantic validation functionality.
@@ -339,6 +341,21 @@ func TestValidateSemantic_ValidFragmentReference(t *testing.T) {
 	err := ValidateSemantic(resource)
 	if err != nil {
 		t.Errorf("expected no error, got: %v", err)
+	}
+}
+
+func TestRuleItem_DefaultPriority(t *testing.T) {
+	yamlData := `
+name: test
+body: "Test rule"
+`
+	var item RuleItem
+	if err := yaml.Unmarshal([]byte(yamlData), &item); err != nil {
+		t.Fatalf("unmarshal failed: %v", err)
+	}
+
+	if item.Priority != 100 {
+		t.Errorf("expected default priority 100, got %d", item.Priority)
 	}
 }
 

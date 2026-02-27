@@ -121,7 +121,7 @@
     {
       "id": "TASK-008",
       "priority": 2,
-      "status": "TODO",
+      "status": "DONE",
       "dependencies": ["TASK-001", "TASK-002", "TASK-003", "TASK-004"],
       "description": "Add test cases for all validation gap fixes",
       "comments": [
@@ -131,7 +131,8 @@
         "- Verify error message is clear and actionable",
         "- Test case with valid input that should pass",
         "- Update conformance tests if official fixtures exist",
-        "Estimated effort: 2 hours"
+        "Estimated effort: 2 hours",
+        "COMPLETED: Tests for gaps #1-4 already exist. Added test for priority default (gap #5)."
       ]
     }
   ]
