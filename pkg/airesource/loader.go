@@ -93,10 +93,14 @@ func loadResourceSync(path string, options LoadOptions) (*Resource, error) {
 		return nil, &LoadError{Path: path, Message: err.Error()}
 	}
 
+	// Validation pipeline: fail-fast between phases, collect errors within phases
+	// Phase 1: Schema validation - structural conformance to JSON Schema
 	if err := schema.ValidateSchema(&resource); err != nil {
 		return nil, err
 	}
 
+	// Phase 2: Semantic validation - logical consistency and business rules
+	// Only runs if schema validation passes (fail-fast between phases)
 	if err := ValidateSemantic(&resource); err != nil {
 		return nil, err
 	}
