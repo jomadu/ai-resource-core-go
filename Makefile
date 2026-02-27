@@ -11,14 +11,14 @@ help:
 	@echo "  make help              - Show this help message"
 
 test:
-	@if [ ! -d testdata/spec/schema ]; then \
+	@if [ ! -d internal/assets/spec/schema ]; then \
 		echo "Initializing submodule..."; \
 		git submodule update --init --recursive; \
 	fi
 	go test ./...
 
 test-conformance:
-	@if [ ! -d testdata/spec/schema ]; then \
+	@if [ ! -d internal/assets/spec/schema ]; then \
 		echo "Initializing submodule..."; \
 		git submodule update --init --recursive; \
 	fi
@@ -31,8 +31,8 @@ lint:
 	go vet ./...
 
 update-spec:
-	git submodule update --remote testdata/spec
-	@echo "Spec updated. Review changes with: git diff testdata/spec"
+	git submodule update --remote internal/assets/spec
+	@echo "Spec updated. Review changes with: git diff internal/assets/spec"
 
 clean:
 	go clean ./...

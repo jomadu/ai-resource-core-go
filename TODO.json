@@ -53,11 +53,14 @@
     {
       "id": "TASK-005",
       "priority": 2,
-      "status": "TODO",
+      "status": "DONE",
       "dependencies": ["TASK-001"],
       "description": "Update Makefile to reference new submodule path",
       "comments": [
-        "See PLAN.md: Implementation Steps > 5. Update Makefile"
+        "See PLAN.md: Implementation Steps > 5. Update Makefile",
+        "Completed: Updated test, test-conformance, and update-spec targets",
+        "Changed paths from testdata/spec to internal/assets/spec",
+        "Verified: make test runs successfully"
       ]
     },
     {
