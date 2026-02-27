@@ -40,11 +40,14 @@
     {
       "id": "TASK-004",
       "priority": 1,
-      "status": "TODO",
+      "status": "DONE",
       "dependencies": ["TASK-002"],
       "description": "Update pkg/airesource/conformance_test.go to use internal/assets",
       "comments": [
-        "See PLAN.md: Implementation Steps > 4. Update Conformance Tests"
+        "See PLAN.md: Implementation Steps > 4. Update Conformance Tests",
+        "Completed: Updated conformance_test.go to use assets.ValidFixtures() and assets.InvalidFixtures()",
+        "Removed hardcoded paths to testdata/spec/",
+        "All conformance tests pass: go test ./pkg/airesource/... -run TestConformance"
       ]
     },
     {

@@ -1,56 +1,51 @@
 package airesource
 
 import (
+	"io/fs"
 	"os"
 	"path/filepath"
 	"testing"
+
+	"github.com/aws/ai-resource-core-go/internal/assets"
 )
 
 // Conformance tests verify that the Go implementation correctly interprets
 // AI Resources according to the official specification.
 //
-// These tests MUST use official fixtures from the ai-resource-spec repository
-// (via git submodule at testdata/spec/). They MUST NOT fall back to local
-// fixtures or skip tests silently.
+// These tests use official fixtures from the ai-resource-spec repository
+// (embedded via internal/assets package).
 //
 // Run with: make test-conformance
 
-const (
-	specValidDir   = "../../testdata/spec/schema/draft/tests/valid"
-	specInvalidDir = "../../testdata/spec/schema/draft/tests/invalid"
-)
-
-func checkSpecFixtures(t *testing.T) {
-	t.Helper()
-	
-	if _, err := os.Stat(specValidDir); os.IsNotExist(err) {
-		t.Fatal("Conformance test fixtures not found at testdata/spec/\n\n" +
-			"The official AI Resource Specification test suite is required for conformance testing.\n\n" +
-			"To initialize: make test\n\n" +
-			"Or manually: git submodule update --init --recursive")
-	}
-	
-	if _, err := os.Stat(specInvalidDir); os.IsNotExist(err) {
-		t.Fatal("Expected structure: schema/draft/tests/valid/ and schema/draft/tests/invalid/")
-	}
-}
-
 func TestConformance(t *testing.T) {
-	checkSpecFixtures(t)
-	
 	t.Run("ValidCases", func(t *testing.T) {
-		files, err := filepath.Glob(filepath.Join(specValidDir, "*.yml"))
+		validFS := assets.ValidFixtures("draft")
+		entries, err := fs.ReadDir(validFS, ".")
 		if err != nil {
-			t.Fatalf("failed to glob valid fixtures: %v", err)
+			t.Fatalf("failed to read valid fixtures: %v", err)
 		}
-		if len(files) == 0 {
-			t.Fatal("No test fixtures found in testdata/spec/schema/draft/tests/valid/")
+		if len(entries) == 0 {
+			t.Fatal("No valid test fixtures found")
 		}
 		
-		for _, f := range files {
-			name := filepath.Base(f)
+		for _, entry := range entries {
+			if filepath.Ext(entry.Name()) != ".yml" {
+				continue
+			}
+			name := entry.Name()
 			t.Run(name, func(t *testing.T) {
-				_, err := LoadResource(f)
+				data, err := fs.ReadFile(validFS, name)
+				if err != nil {
+					t.Fatalf("failed to read fixture: %v", err)
+				}
+				
+				// Write to temp file for LoadResource
+				tmpFile := filepath.Join(t.TempDir(), name)
+				if err := os.WriteFile(tmpFile, data, 0644); err != nil {
+					t.Fatalf("failed to write temp file: %v", err)
+				}
+				
+				_, err = LoadResource(tmpFile)
 				if err != nil {
 					t.Fatalf("expected valid, got error: %v", err)
 				}
@@ -59,18 +54,33 @@ func TestConformance(t *testing.T) {
 	})
 	
 	t.Run("InvalidCases", func(t *testing.T) {
-		files, err := filepath.Glob(filepath.Join(specInvalidDir, "*.yml"))
+		invalidFS := assets.InvalidFixtures("draft")
+		entries, err := fs.ReadDir(invalidFS, ".")
 		if err != nil {
-			t.Fatalf("failed to glob invalid fixtures: %v", err)
+			t.Fatalf("failed to read invalid fixtures: %v", err)
 		}
-		if len(files) == 0 {
-			t.Fatal("No test fixtures found in testdata/spec/schema/draft/tests/invalid/")
+		if len(entries) == 0 {
+			t.Fatal("No invalid test fixtures found")
 		}
 		
-		for _, f := range files {
-			name := filepath.Base(f)
+		for _, entry := range entries {
+			if filepath.Ext(entry.Name()) != ".yml" {
+				continue
+			}
+			name := entry.Name()
 			t.Run(name, func(t *testing.T) {
-				_, err := LoadResource(f)
+				data, err := fs.ReadFile(invalidFS, name)
+				if err != nil {
+					t.Fatalf("failed to read fixture: %v", err)
+				}
+				
+				// Write to temp file for LoadResource
+				tmpFile := filepath.Join(t.TempDir(), name)
+				if err := os.WriteFile(tmpFile, data, 0644); err != nil {
+					t.Fatalf("failed to write temp file: %v", err)
+				}
+				
+				_, err = LoadResource(tmpFile)
 				if err == nil {
 					t.Fatalf("expected error, got success")
 				}
