@@ -27,11 +27,14 @@
     {
       "id": "TASK-003",
       "priority": 1,
-      "status": "TODO",
+      "status": "DONE",
       "dependencies": ["TASK-002"],
       "description": "Update internal/schema package to use internal/assets for schemas",
       "comments": [
-        "See PLAN.md: Implementation Steps > 3. Update internal/schema Package"
+        "See PLAN.md: Implementation Steps > 3. Update internal/schema Package",
+        "Completed: Updated validator.go to use assets.GetSchema() instead of hardcoded schemas",
+        "Deleted internal/schema/schemas.go (no longer needed)",
+        "Tests pass: go test ./internal/schema"
       ]
     },
     {

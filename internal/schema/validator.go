@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/aws/ai-resource-core-go/internal/assets"
 	"github.com/xeipuuv/gojsonschema"
 )
 
@@ -94,18 +95,11 @@ func ValidateSchema(resource interface{}) error {
 }
 
 func getSchemaForKind(kind string) (string, error) {
-	switch kind {
-	case "Prompt":
-		return promptSchema, nil
-	case "Promptset":
-		return promptsetSchema, nil
-	case "Rule":
-		return ruleSchema, nil
-	case "Ruleset":
-		return rulesetSchema, nil
-	default:
+	schemaBytes, err := assets.GetSchema("draft", kind)
+	if err != nil {
 		return "", fmt.Errorf("no schema for kind: %s", kind)
 	}
+	return string(schemaBytes), nil
 }
 
 // ValidateAgainstSchema validates data against a JSON Schema.
