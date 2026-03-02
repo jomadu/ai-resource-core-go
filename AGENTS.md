@@ -2,16 +2,27 @@
 
 ## Work Tracking System
 
-Tasks are tracked in `TODO.md` at repository root.
+Tasks are tracked in `TODO.json` at repository root.
 
 Task format:
-```markdown
-## TASK-001
-- Priority: 1-5 (1=highest)
-- Status: TODO/IN_PROGRESS/BLOCKED/DONE
-- Dependencies: [TASK-XXX, ...]
-- Description: Task description
+```json
+{
+  "id": "TASK-001",
+  "priority": 1,
+  "status": "TODO",
+  "dependencies": ["TASK-XXX"],
+  "description": "Task description",
+  "comments": []
+}
 ```
+
+Fields:
+- `id`: Task identifier (TASK-XXX)
+- `priority`: 1-5 (1=highest)
+- `status`: TODO/IN_PROGRESS/BLOCKED/DONE
+- `dependencies`: Array of task IDs
+- `description`: Task description
+- `comments`: Array of implementation notes (agents append as needed)
 
 Manual editing. Tasks auto-increment. Keep all tasks (including DONE) in file.
 
@@ -21,9 +32,16 @@ Manual editing. Tasks auto-increment. Keep all tasks (including DONE) in file.
 
 ## Quick Reference
 
-- Edit `TODO.md` - Manage tasks
-- `go test ./...` - Run tests (when initialized)
-- `go build ./...` - Build packages (when initialized)
+- Edit `TODO.json` - Manage tasks
+- `jq '.tasks[] | select(.id == "TASK-XXX")' TODO.json` - Show single task
+- `jq '.tasks[] | select(.status != "DONE")' TODO.json` - List incomplete tasks
+- `jq '.tasks[] | select(.status == "TODO" and (.dependencies | length == 0 or all(. as $dep | any($dep == .tasks[].id and .tasks[].status == "DONE"))))' TODO.json` - List ready tasks
+- `make help` - Show all available commands
+- `make test` - Run all tests (auto-initializes submodule)
+- `make test-conformance` - Run conformance tests only
+- `make build` - Build all packages
+- `make lint` - Run linters
+- `make update-spec` - Update spec to latest version
 
 ## Planning System
 
@@ -53,7 +71,7 @@ Patterns:
 - `internal/template/*.go` - Mustache rendering
 - `internal/types/*.go` - Type validation
 
-Excludes: `testdata/`, `.git/`
+Excludes: `.git/`
 
 ## Audit Output
 
@@ -79,11 +97,13 @@ Audit results written to `AUDIT.md` at repository root.
 
 ## Operational Learnings
 
-Last verified: 2026-02-20
+Last verified: 2026-02-25
 
 **Working:**
 - Specification structure in `specs/` directory
 - TASK.md defines implementation plan
+- Makefile is the standard interface for all development tasks
+- Conformance test submodule is REQUIRED (not optional)
 
 **Not working:**
 - Go module not initialized (no go.mod)
@@ -93,3 +113,8 @@ Last verified: 2026-02-20
 **Rationale:**
 - Project in bootstrap phase
 - Specifications complete, implementation pending
+
+**Troubleshooting:**
+- If tests fail with submodule error, run `make test` (auto-initializes submodule)
+- Submodule must be initialized before running conformance tests
+- Use `make update-spec` to update spec to latest version

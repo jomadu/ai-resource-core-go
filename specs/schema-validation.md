@@ -84,19 +84,25 @@ function ValidateSchema(resource):
 - `core-types.md` - Resource types being validated
 - `resource-loading.md` - Resources to validate
 - JSON Schema library (github.com/xeipuuv/gojsonschema)
-- Embedded JSON schemas from ai-resource-spec repo
+- Embedded JSON schemas from ai-resource-spec repo via `internal/assets`
 
 ## Implementation Mapping
 
 **Source files:**
 - `internal/schema/validator.go` - Schema validation logic
-- `internal/schema/schemas.go` - Embedded JSON schemas
+- `internal/assets/assets.go` - Embedded JSON schemas (via go:embed)
+- `internal/assets/spec/` - Git submodule containing schema files
 - `pkg/airesource/errors.go` - SchemaError type
 
 **Related specs:**
 - `core-types.md` - Types being validated
 - `semantic-validation.md` - Additional validation beyond schema
 - `error-handling.md` - Error type definitions
+
+**Schema Loading:**
+- Schemas are embedded from `internal/assets/spec/schema/draft/*.schema.json`
+- `assets.GetSchema(version, kind)` returns schema bytes
+- `validator.go` uses `assets.GetSchema()` instead of hardcoded schemas
 
 ## Examples
 

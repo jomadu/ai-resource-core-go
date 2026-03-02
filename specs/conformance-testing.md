@@ -171,24 +171,29 @@ Test fixtures are maintained in the official ai-resource-spec repository and ref
 
 ```bash
 # Initial setup
-git submodule add https://github.com/org/ai-resource-spec testdata/spec
+git submodule add https://github.com/org/ai-resource-spec internal/assets/spec
 git submodule update --init --recursive
 
 # Update to latest spec version
-cd testdata/spec
+cd internal/assets/spec
 git pull origin main
-cd ../..
-git add testdata/spec
+cd ../../..
+git add internal/assets/spec
 git commit -m "Update spec test fixtures to v1.2.3"
 ```
 
 **Directory structure:**
 ```
-testdata/
-  spec/              # Git submodule → ai-resource-spec repo
-    examples/
-      valid/
-      invalid/
+internal/
+  assets/
+    spec/              # Git submodule → ai-resource-spec repo
+      schema/
+        draft/
+          *.schema.json
+          tests/
+            valid/
+            invalid/
+    assets.go          # Embeds schemas and fixtures
 ```
 
 **Benefits:**
@@ -196,12 +201,149 @@ testdata/
 - Intentional updates when ready to test new spec versions
 - Works offline after initial clone
 - Standard Git tooling
+- Embedded in binary via go:embed
+
+## Source of Truth
+
+The official AI Resource Specification repository is the canonical source for conformance testing:
+
+**Repository:** `https://github.com/jomadu/ai-resource-spec.git`
+
+**Purpose:** Provides the authoritative test fixtures that all implementations MUST use to verify spec compliance.
+
+**Why Required:**
+- **Prevents drift** - Ensures all implementations test against identical fixtures
+- **Ensures interoperability** - Resources that pass conformance tests work across all compliant implementations
+- **Single source of truth** - Spec repository owns the definition of correctness
+- **Version alignment** - Implementation can pin to specific spec versions for stability
+
+**Structure:**
+- Valid fixtures: `schema/draft/tests/valid/`
+- Invalid fixtures: `schema/draft/tests/invalid/`
+
+Implementations MUST NOT use local test fixtures as a substitute for the official spec repository. Local fixtures may be used for implementation-specific tests, but conformance testing MUST use the official fixtures.
+
+## Makefile-Driven Workflow
+
+The Makefile provides a standard interface for all development tasks, abstracting away submodule management and ensuring consistent workflows:
+
+**Standard Commands:**
+- `make test` - Run all tests (automatically initializes submodule if needed)
+- `make test-conformance` - Run conformance tests only
+- `make build` - Build all packages
+- `make lint` - Run linters
+- `make update-spec` - Update spec submodule to latest version
+- `make clean` - Clean build artifacts
+- `make help` - Show all available commands
+
+**Rationale:**
+- **Automation** - Developers don't need to manually manage git submodules
+- **Consistency** - Same commands work for all developers and CI/CD
+- **Discoverability** - `make help` shows available commands
+- **Error prevention** - Makefile ensures submodule is initialized before running tests
+
+**CI/CD Integration:**
+```bash
+# CI/CD should use Makefile commands, not direct go commands
+make test
+make lint
+```
+
+The Makefile handles submodule initialization automatically, so CI/CD configurations don't need explicit `git submodule update --init` commands.
+
+## Submodule Requirements
+
+Conformance testing uses the official spec repository via git submodule, embedded at build time.
+
+**Requirements:**
+- Submodule MUST be initialized at `internal/assets/spec/` before building
+- Schemas and fixtures are embedded via `go:embed` in `internal/assets/assets.go`
+- Conformance tests use `assets.ValidFixtures()` and `assets.InvalidFixtures()` to access embedded fixtures
+- Tests run against embedded fixtures (no external file dependencies at runtime)
+
+**Error Handling:**
+If fixtures are not embedded (build-time issue), tests will fail with clear errors from the `internal/assets` package.
+
+**Rationale:**
+- **No runtime dependencies** - Fixtures are embedded in the binary
+- **Consistent behavior** - Same fixtures across all environments
+- **No drift** - Impossible to accidentally test against different fixtures
+- **Enforces best practice** - Submodule must be initialized before building
+
+## Version Pinning Strategy
+
+Git submodules pin to a specific commit by default. This is the recommended approach for build stability.
+
+**Strategy:**
+- Submodule references a specific commit (not a branch)
+- Updates are intentional and controlled via `make update-spec`
+- Each update is reviewed, tested, and committed explicitly
+
+**Rationale:**
+- **Build stability** - Tests are reproducible across time and environments
+- **Controlled updates** - New spec versions are adopted intentionally, not automatically
+- **Easier debugging** - Known-good commit can be referenced when investigating failures
+- **Bisection support** - Can identify which spec change caused a test failure
+
+## Update Workflow:**
+1. Run `make update-spec` to fetch latest spec version
+2. Review changes: `git diff internal/assets/spec`
+3. Rebuild to embed new fixtures: `make build`
+4. Run `make test` to verify compatibility
+5. If tests pass, commit the new pin: `git add internal/assets/spec && git commit -m "Update spec to vX.Y.Z"`
+6. If tests fail, investigate and fix implementation or document known issues
+
+**Optional: Testing Against Latest Spec**
+
+For early warning of upcoming spec changes, CI/CD can optionally run a separate job that tests against the latest spec version:
+
+```yaml
+# Stable build (required to pass)
+- name: Test against pinned spec
+  run: make test
+
+# Early warning (allowed to fail)
+- name: Test against latest spec
+  run: |
+    cd internal/assets/spec
+    git pull origin main
+    cd ../../..
+    make build
+    make test
+  continue-on-error: true
+```
+
+This provides advance notice of spec changes without blocking builds.
+
+## Failure Policy
+
+Conformance tests fail explicitly when fixtures are not embedded (build-time issue).
+
+**Failure Conditions:**
+
+| Condition | Behavior | Error Message |
+|-----------|----------|---------------|
+| Submodule not initialized before build | Build fails | "pattern internal/assets/spec/...: no matching files found" |
+| No test files embedded | Test fails | "No valid/invalid test fixtures found" |
+
+**Rationale:**
+- **Build-time validation** - Missing fixtures are caught during build, not runtime
+- **Clear error messages** - Developers know exactly what's wrong
+- **Fail fast** - Problems are detected immediately
+- **Consistent behavior** - Same failure modes across all environments
+
+**Not Allowed:**
+- Building without initializing submodule
+- Skipping conformance tests with a warning
+- Continuing with partial test coverage
 
 ## Implementation Mapping
 
 **Source files:**
-- `conformance_test.go` - Main conformance test suite
-- `testdata/spec/` - Git submodule to ai-resource-spec repository
+- `pkg/airesource/conformance_test.go` - Main conformance test suite
+- `internal/assets/assets.go` - Embeds schemas and fixtures
+- `internal/assets/spec/` - Git submodule to ai-resource-spec repository
+- `Makefile` - Standard development interface
 
 **Related specs:**
 - All specs - Conformance tests verify all functionality
@@ -210,9 +352,9 @@ testdata/
 
 ### Example 1: Valid Prompt Test
 
-**Input:**
+**Input (embedded fixture):**
 ```yaml
-# testdata/valid/prompt.yml
+# internal/assets/spec/schema/draft/tests/valid/prompt-simple.yml
 apiVersion: ai-resource/draft
 kind: Prompt
 metadata:
@@ -363,7 +505,8 @@ All tests passed!
 
 ## Notes
 
-- Test fixtures are managed via git submodule to ai-resource-spec repository
+- Test fixtures are managed via git submodule to ai-resource-spec repository at `internal/assets/spec/`
+- Fixtures are embedded in the binary via `go:embed` directives in `internal/assets/assets.go`
 - Tests should be organized by resource kind and validation type
 - Conformance tests are separate from unit tests
 - Tests should run quickly (< 1 second for full suite)
@@ -372,6 +515,7 @@ All tests passed!
 - Update submodule to test against new spec versions
 - Consider using table-driven tests for clarity
 - CI/CD should initialize submodules: `git submodule update --init --recursive`
+- Submodule must be initialized before building (for go:embed to work)
 
 ## Known Issues
 

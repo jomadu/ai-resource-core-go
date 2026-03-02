@@ -1,0 +1,3 @@
+[submodule "internal/assets/spec"]
+	path = internal/assets/spec
+	url = https://github.com/jomadu/ai-resource-spec.git
